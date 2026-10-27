@@ -18,7 +18,7 @@ test("todas as páginas carregam, sem erros e sem rolagem horizontal", async ({
   ]) {
     const response = await page.goto(route);
     expect(response?.status()).toBe(200);
-    await expect(page.locator("h1")).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -256,6 +256,12 @@ test("todos os arquivos de imagem existem", async ({ request }) => {
     "lemonade",
     "brownie",
     "shake",
+    "drink-landscape",
+    "lemonade-landscape",
+    "shake-landscape",
+    "brownie-landscape",
+    "fries-landscape",
+    "loaded-fries-landscape",
   ];
   const cutouts = [
     "exploded-burger",

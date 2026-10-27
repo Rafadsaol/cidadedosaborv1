@@ -575,26 +575,24 @@ img {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 4 / 3;
+  padding: 16px;
   background: radial-gradient(ellipse at center, #302b24, #1d1b19 75%);
   position: relative;
   overflow: hidden;
   text-align: left;
 }
 .product-photo-frame {
-  position: absolute;
-  inset: 16px;
+  display: block;
+  position: relative;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
 }
 .product-photo .food-image {
   object-fit: contain;
   object-position: center;
 }
-.product-photo--photograph .food-image {
-  object-fit: cover;
-}
 .product-photo:hover .food-image {
-  transform: scale(1.02);
+  transform: none;
 }
 .product-tag {
   position: absolute;

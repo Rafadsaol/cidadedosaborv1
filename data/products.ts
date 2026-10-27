@@ -102,7 +102,7 @@ export const products: Product[] = [
     description: "Douradas, sequinhas e com nosso tempero especial.",
     price: 16.9,
     category: "Acompanhamentos",
-    image: "/images/fries.webp",
+    image: "/images/fries-landscape.webp",
     ingredients: ["Batata", "Sal", "Páprica", "Alecrim"],
   },
   {
@@ -111,7 +111,7 @@ export const products: Product[] = [
     description: "Uma generosa porção com cheddar cremoso e bacon.",
     price: 24.9,
     category: "Acompanhamentos",
-    image: "/images/fries.webp",
+    image: "/images/loaded-fries-landscape.webp",
     ingredients: ["Batata", "Cheddar", "Bacon", "Cebolinha"],
   },
   {
@@ -120,7 +120,7 @@ export const products: Product[] = [
     description: "Bem gelado, do jeito que combina com seu burger.",
     price: 7.9,
     category: "Bebidas",
-    image: "/images/drink.webp",
+    image: "/images/drink-landscape.webp",
     ingredients: ["Refrigerante em lata 350ml"],
   },
   {
@@ -129,7 +129,7 @@ export const products: Product[] = [
     description: "Limão fresco, hortelã e aquele toque de leveza.",
     price: 12.9,
     category: "Bebidas",
-    image: "/images/lemonade.webp",
+    image: "/images/lemonade-landscape.webp",
     ingredients: ["Limão", "Água", "Hortelã", "Açúcar"],
   },
   {
@@ -138,7 +138,7 @@ export const products: Product[] = [
     description: "Chocolate intenso, casquinha crocante e interior macio.",
     price: 18.9,
     category: "Sobremesas",
-    image: "/images/brownie.webp",
+    image: "/images/brownie-landscape.webp",
     ingredients: [
       "Chocolate meio amargo",
       "Farinha",
@@ -153,7 +153,7 @@ export const products: Product[] = [
     description: "Cremoso, intenso e feito para fechar com chave de ouro.",
     price: 22.9,
     category: "Sobremesas",
-    image: "/images/shake.webp",
+    image: "/images/shake-landscape.webp",
     ingredients: ["Sorvete de chocolate", "Leite", "Calda de chocolate"],
   },
 ];

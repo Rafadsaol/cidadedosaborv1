@@ -84,6 +84,8 @@ Os formulários são processados somente em memória, com dados fictícios; as s
 
 ## Configuração futura
 
+As fotos de bebidas, sobremesas e acompanhamentos usam composição horizontal 3:2, com o produto inteiro e espaço ao redor. A grade mantém essa proporção com `object-fit: contain`, sem recorte ou zoom no hover. Ao substituir fotos, preserve essa composição; os hambúrgueres continuam em PNG transparente.
+
 Edite `data/products.ts` para os produtos e `data/site.ts` para os dados do estabelecimento. Os canais WhatsApp e Instagram começam vazios: a interface exibe seu estado indisponível em vez de links falsos. Apenas URLs HTTPS nos formatos aceitos são exibidas (`https://wa.me/NUMERO` e `https://www.instagram.com/PERFIL`). Não coloque segredos nesses arquivos públicos.
 
 Não há integração externa obrigatória no runtime: imagens, fontes e dados estão locais. O acesso ao registro npm é necessário para instalar dependências.

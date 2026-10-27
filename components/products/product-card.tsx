@@ -15,7 +15,7 @@ export function ProductCard({
   return (
     <article className="product-card">
       <button
-        className={`product-photo ${product.category !== "Hambúrgueres" ? "product-photo--photograph" : ""}`}
+        className="product-photo"
         onClick={() => onDetails(product)}
         aria-label={`Ver detalhes de ${product.name}`}
       >
