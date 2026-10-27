@@ -6,3 +6,6 @@ out/
 *.tsbuildinfo
 /test-results/
 /playwright-report/
+
+# Gerado automaticamente pelo Next.js
+/next-env.d.ts
