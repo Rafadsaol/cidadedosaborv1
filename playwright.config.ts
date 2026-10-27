@@ -15,9 +15,15 @@ export default defineConfig({
     },
   },
   projects: [
-    { name: "desktop", use: { ...devices["Desktop Chrome"] } },
+    { name: "logic", testMatch: /logic\.spec\.ts/ },
+    {
+      name: "desktop",
+      testIgnore: /logic\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"] },
+    },
     {
       name: "mobile",
+      testIgnore: /logic\.spec\.ts/,
       use: { ...devices["iPhone 13"], defaultBrowserType: "chromium" },
     },
   ],

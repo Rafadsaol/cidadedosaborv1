@@ -1,6 +1,6 @@
 export const money = (value: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
-    value,
+    value / 100,
   );
 export const localDate = () => {
   const d = new Date();

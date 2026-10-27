@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { X, Plus, Leaf } from "lucide-react";
+import { X, Leaf } from "lucide-react";
 import { FoodImage } from "@/components/ui/food-image";
-import { useCart } from "@/components/cart-provider";
-import { money } from "@/lib/utils";
+import { ProductCustomizer } from "./product-customizer";
 import type { Product } from "@/types";
 export function ProductModal({
   product,
@@ -13,7 +12,6 @@ export function ProductModal({
   onClose: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
-  const { add, ready } = useCart();
   useEffect(() => {
     const el = dialog.current;
     if (product && el) {
@@ -69,19 +67,11 @@ export function ProductModal({
               Contém ou pode conter glúten, leite, ovos e outros alergênicos.
               Ingredientes demonstrativos.
             </p>
-            <div className="modal-bottom">
-              <strong>{money(product.price)}</strong>
-              <button
-                className="button"
-                disabled={!ready}
-                onClick={() => {
-                  add(product.id);
-                  onClose();
-                }}
-              >
-                <Plus size={18} /> Adicionar ao carrinho
-              </button>
-            </div>
+            <ProductCustomizer
+              key={product.id}
+              product={product}
+              onClose={onClose}
+            />
           </div>
         </div>
       )}

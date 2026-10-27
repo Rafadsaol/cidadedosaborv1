@@ -10,6 +10,7 @@ test("todas as páginas carregam, sem erros e sem rolagem horizontal", async ({
     "/cardapio",
     "/delivery",
     "/carrinho",
+    "/checkout",
     "/reservas",
     "/sobre",
     "/contato",
@@ -64,6 +65,10 @@ test("modal, carrinho, quantidades, persistência e remoção", async ({
       name: "Adicionar Cidade Original ao carrinho",
       exact: true,
     })
+    .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Adicionar ao carrinho", exact: true })
     .click();
   await expect(
     page.getByRole("link", { name: "Carrinho, 1 itens" }),
@@ -292,6 +297,7 @@ test("acessibilidade automática das nove páginas", async ({ page }) => {
     "/cardapio",
     "/delivery",
     "/carrinho",
+    "/checkout",
     "/reservas",
     "/sobre",
     "/contato",

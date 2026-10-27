@@ -1,6 +1,6 @@
 "use client";
-import { Search, SlidersHorizontal, UtensilsCrossed, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Search, UtensilsCrossed, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { categories, products } from "@/data/products";
 import { ProductGrid } from "./product-grid";
 const normalize = (text: string) =>
@@ -8,17 +8,67 @@ const normalize = (text: string) =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
+const sorts = [
+  { id: "featured", name: "Destaques da casa" },
+  { id: "price-asc", name: "Menor preço" },
+  { id: "price-desc", name: "Maior preço" },
+  { id: "name", name: "Nome (A–Z)" },
+];
+type Filters = { search: string; category: string; sort: string };
+const defaults: Filters = { search: "", category: "Todos", sort: "featured" };
+function readFilters(): Filters {
+  const params = new URLSearchParams(window.location.search);
+  const category = params.get("categoria") || "Todos";
+  const sort = params.get("ordem") || "featured";
+  return {
+    search: (params.get("q") || "").slice(0, 100),
+    category: categories.some((c) => c === category) ? category : "Todos",
+    sort: sorts.some((s) => s.id === sort) ? sort : "featured",
+  };
+}
 export function Catalog() {
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("Todos");
+  const [filters, setFilters] = useState(defaults);
+  useEffect(() => {
+    const timer = setTimeout(() => setFilters(readFilters()), 0);
+    const restore = () => setFilters(readFilters());
+    window.addEventListener("popstate", restore);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("popstate", restore);
+    };
+  }, []);
+  const change = useCallback(
+    (next: Partial<Filters>, replace = false) => {
+      const value = { ...filters, ...next };
+      setFilters(value);
+      const params = new URLSearchParams();
+      if (value.search) params.set("q", value.search);
+      if (value.category !== "Todos") params.set("categoria", value.category);
+      if (value.sort !== "featured") params.set("ordem", value.sort);
+      const url = `${window.location.pathname}${params.size ? `?${params}` : ""}${window.location.hash}`;
+      if (replace) window.history.replaceState(null, "", url);
+      else window.history.pushState(null, "", url);
+    },
+    [filters],
+  );
   const filtered = useMemo(
     () =>
-      products.filter(
-        (p) =>
-          (category === "Todos" || p.category === category) &&
-          normalize(p.name).includes(normalize(search.trim())),
-      ),
-    [search, category],
+      products
+        .filter(
+          (p) =>
+            (filters.category === "Todos" || p.category === filters.category) &&
+            normalize(p.name).includes(normalize(filters.search.trim())),
+        )
+        .sort((a, b) =>
+          filters.sort === "price-asc"
+            ? a.priceCents - b.priceCents
+            : filters.sort === "price-desc"
+              ? b.priceCents - a.priceCents
+              : filters.sort === "name"
+                ? a.name.localeCompare(b.name, "pt-BR")
+                : Number(!!b.bestseller) - Number(!!a.bestseller),
+        ),
+    [filters],
   );
   return (
     <section className="container catalog">
@@ -31,34 +81,46 @@ export function Catalog() {
           <input
             id="product-search"
             type="search"
+            maxLength={100}
             placeholder="Qual é a sua fome de hoje?"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={filters.search}
+            onChange={(event) => change({ search: event.target.value }, true)}
           />
-          {search && (
+          {filters.search && (
             <button
               className="icon-button"
               aria-label="Limpar busca"
-              onClick={() => setSearch("")}
+              onClick={() => change({ search: "" }, true)}
             >
               <X size={17} />
             </button>
           )}
         </div>
-        <span className="catalog-hint">
-          <SlidersHorizontal size={17} /> Feito na hora. Do seu jeito.
-        </span>
+        <label className="catalog-sort">
+          Ordenar por
+          <select
+            aria-label="Ordenar por"
+            value={filters.sort}
+            onChange={(event) => change({ sort: event.target.value })}
+          >
+            {sorts.map((sort) => (
+              <option key={sort.id} value={sort.id}>
+                {sort.name}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
       <div className="category-list" aria-label="Filtrar por categoria">
-        {["Todos", ...categories].map((c) => (
+        {["Todos", ...categories].map((category) => (
           <button
-            key={c}
-            className={c === category ? "selected" : ""}
-            aria-pressed={c === category}
-            onClick={() => setCategory(c)}
+            key={category}
+            className={category === filters.category ? "selected" : ""}
+            aria-pressed={category === filters.category}
+            onClick={() => change({ category })}
           >
-            {c === "Todos" && <UtensilsCrossed size={16} />}
-            {c}
+            {category === "Todos" && <UtensilsCrossed size={16} />}
+            {category}
           </button>
         ))}
       </div>
@@ -73,19 +135,14 @@ export function Catalog() {
           <Search size={42} />
           <h2>Nenhum sabor por aqui… ainda.</h2>
           <p>Tente outro nome ou explore todas as categorias.</p>
-          <button
-            className="button"
-            onClick={() => {
-              setSearch("");
-              setCategory("Todos");
-            }}
-          >
+          <button className="button" onClick={() => change(defaults)}>
             Limpar filtros
           </button>
         </div>
       )}
       <p className="demo-caption">
-        Cardápio fictício. Imagens ilustrativas e preços demonstrativos.
+        Cardápio fictício. Imagens ilustrativas, preços e promoções
+        demonstrativos.
       </p>
     </section>
   );

@@ -1,19 +1,19 @@
 "use client";
 import Link from "next/link";
-import {
-  Minus,
-  Plus,
-  Trash2,
-  ShoppingBag,
-  ArrowRight,
-  Info,
-} from "lucide-react";
+import { useState } from "react";
+import { Plus, Trash2, ShoppingBag, ArrowRight, Info } from "lucide-react";
 import { useCart } from "./cart-provider";
 import { products } from "@/data/products";
 import { FoodImage } from "./ui/food-image";
+import { QuantityControl } from "./ui/quantity-control";
+import { ConfirmDialog } from "./ui/confirm-dialog";
+import { ItemDetails } from "./products/item-details";
+import { unitPriceCents } from "@/lib/cart";
 import { money } from "@/lib/utils";
 export function CartPage() {
-  const { items, ready, subtotal, count, update, remove } = useCart();
+  const { items, ready, subtotalCents, count, update, remove, clear } =
+    useCart();
+  const [confirm, setConfirm] = useState(false);
   if (!ready)
     return (
       <div className="container empty-state" role="status">
@@ -36,42 +36,45 @@ export function CartPage() {
   return (
     <section className="container cart-layout">
       <div className="cart-items">
+        <div className="cart-list-heading">
+          <span>
+            {items.length} {items.length === 1 ? "combinação" : "combinações"} ·{" "}
+            {count} itens
+          </span>
+          <button className="remove-button" onClick={() => setConfirm(true)}>
+            <Trash2 size={15} /> Esvaziar carrinho
+          </button>
+        </div>
         {items.map((item) => {
           const product = products.find((p) => p.id === item.productId)!;
+          const unit = unitPriceCents(product, item.configuration);
           return (
-            <article className="cart-item" key={item.productId}>
+            <article className="cart-item" key={item.key}>
               <div className="cart-photo">
-                <FoodImage src={product.image} alt={product.name} />
+                <FoodImage
+                  src={product.image}
+                  alt={product.name}
+                  sizes="110px"
+                />
               </div>
               <div className="cart-item-info">
                 <h2>{product.name}</h2>
-                <span className="muted small">{money(product.price)} cada</span>
-                <div className="quantity-control">
-                  <button
-                    className="icon-button"
-                    aria-label={`Diminuir quantidade de ${product.name}`}
-                    onClick={() => update(product.id, item.quantity - 1)}
-                  >
-                    <Minus size={16} />
-                  </button>
-                  <span aria-label={`Quantidade de ${product.name}`}>
-                    {item.quantity}
-                  </span>
-                  <button
-                    className="icon-button"
-                    disabled={item.quantity >= 99}
-                    aria-label={`Aumentar quantidade de ${product.name}`}
-                    onClick={() => update(product.id, item.quantity + 1)}
-                  >
-                    <Plus size={16} />
-                  </button>
-                </div>
+                <span className="muted small">
+                  {money(unit)} cada · base {money(product.priceCents)}
+                </span>
+                <ItemDetails product={product} item={item} />
+                <QuantityControl
+                  name={product.name}
+                  value={item.quantity}
+                  allowRemove
+                  onChange={(quantity) => update(item.key, quantity)}
+                />
               </div>
               <div className="cart-item-price">
-                <strong>{money(product.price * item.quantity)}</strong>
+                <strong>{money(unit * item.quantity)}</strong>
                 <button
                   className="remove-button"
-                  onClick={() => remove(product.id)}
+                  onClick={() => remove(item.key)}
                   aria-label={`Remover ${product.name}`}
                 >
                   <Trash2 size={16} /> Remover
@@ -89,30 +92,38 @@ export function CartPage() {
         <h2>Resumo do carrinho</h2>
         <div className="summary-row">
           <span>Itens ({count})</span>
-          <span>{money(subtotal)}</span>
+          <span>{money(subtotalCents)}</span>
         </div>
         <div className="summary-row">
           <span>Entrega</span>
-          <span>Não calculada</span>
+          <span>Simulada no checkout</span>
         </div>
         <div className="summary-total">
           <span>Subtotal</span>
-          <strong>{money(subtotal)}</strong>
+          <strong>{money(subtotalCents)}</strong>
         </div>
         <div className="info-box">
           <Info size={20} />
           <p>
-            Este carrinho é uma demonstração. Nenhum pedido será enviado,
-            nenhuma entrega está disponível e não há cobrança.
+            Este carrinho é uma demonstração. Personalize sua experiência e
+            experimente o checkout, sem envio de pedidos nem cobrança.
           </p>
         </div>
-        <Link href="/cardapio" className="button full-width">
-          Adicionar mais sabores <Plus size={17} />
+        <Link href="/checkout" className="button full-width">
+          Ir para checkout demonstrativo <ArrowRight size={17} />
+        </Link>
+        <Link href="/cardapio" className="text-link cart-more">
+          <Plus size={16} /> Adicionar mais sabores
         </Link>
         <p className="small muted">
           Seu carrinho fica salvo somente neste navegador.
         </p>
       </aside>
+      <ConfirmDialog
+        open={confirm}
+        onClose={() => setConfirm(false)}
+        onConfirm={clear}
+      />
     </section>
   );
 }

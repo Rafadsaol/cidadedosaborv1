@@ -1,4 +1,4 @@
-# Cidade do Sabor — versão 1.0
+# Cidade do Sabor — versão 2.0
 
 Frontend demonstrativo de uma hamburgueria fictícia, criado com Next.js App Router, TypeScript, Tailwind CSS 4 e Lucide React. Identidade escura, vermelho e laranja, tipografia Poppins e Inter (Google Fonts distribuídas localmente via Fontsource), fotografias locais em WebP e hambúrgueres em PNG transparente e componentes reutilizáveis.
 
@@ -16,6 +16,8 @@ npm run dev
 Abra o endereço exibido pelo Next.js no seu computador. Para atualizar a cópia local após alterações enviadas ao GitHub, execute `git pull origin main` e `npm ci` antes de iniciar novamente. Se você tiver alterações locais, faça commit ou guarde-as antes do pull; não use reset para descartá-las.
 
 A cópia local no VS Code e o ambiente na nuvem são checkouts separados. Arquivos são sincronizados por Git; processos e dados do navegador não são sincronizados.
+
+No PowerShell, se houver bloqueio de `npm.ps1`, use `npm.cmd ci` e `npm.cmd run dev`.
 
 ## Verificações
 
@@ -42,7 +44,8 @@ app/
   page.tsx                 # Início
   cardapio/                # Pesquisa, categorias e produtos
   delivery/                # Proposta de entrega demonstrativa
-  carrinho/                # Carrinho persistido localmente
+  carrinho/                # Carrinho com personalizações
+  checkout/                # Checkout e sucesso demonstrativos
   reservas/                # Formulário de simulação
   sobre/                   # História fictícia da marca
   contato/                 # Formulário e canais configuráveis
@@ -51,17 +54,23 @@ app/
   error.tsx, loading.tsx, not-found.tsx
 components/
   layout/                  # Cabeçalho, navegação móvel e rodapé
-  products/                # Catálogo, cards, grade e modal acessível
+  products/                # Catálogo, ordenação e personalização
+  checkout/                # Formulário e resumo detalhado
   ui/                      # Imagens com fallback, títulos e avisos
   cart-provider.tsx        # Estado, limites, persistência e feedback
   cart-page.tsx, demo-form.tsx, auth-page.tsx
 data/
-  products.ts              # Fonte única de produtos e categorias
+  products.ts              # Produtos, categorias e preços em centavos
+  customization.ts         # Adicionais, combos e frete fictício
   site.ts                  # Horários, endereço e canais fictícios
-lib/utils.ts               # Moeda brasileira e data local
+lib/cart.ts                # Normalização, preços, migração e agrupamento
+lib/checkout.ts            # Validação local do checkout
+lib/utils.ts               # Formatação de centavos e data local
 types/index.ts             # Tipos dos produtos e carrinho
 public/images/             # Imagens gastronômicas locais e fallback SVG
-tests/site.spec.ts          # Fluxos funcionais e responsividade
+tests/site.spec.ts          # Regressão das funcionalidades V1
+tests/v2.spec.ts            # Personalização, combos e checkout
+tests/logic.spec.ts         # Preços, armazenamento e validação
 playwright.config.ts
 ```
 
@@ -69,16 +78,17 @@ playwright.config.ts
 
 - Vitrine inicial com seletor de três hambúrgueres, setas, indicadores e adição do produto em destaque ao carrinho.
 - Cabeçalho com marca centralizada, menu lateral com navegação por teclado, cidade ilustrativa, busca e carrinho.
-- Navegação, menu móvel, busca por nome (sem diferenciar acentos ou maiúsculas) e filtro por categoria.
-- Detalhes do produto em diálogo nativo com foco, Escape e fechamento pelo fundo.
-- Carrinho: adicionar, remover, aumentar/diminuir (até 99 unidades por produto), contar itens e calcular subtotal em reais.
+- Navegação, busca em tempo real sem diferenciar acentos, filtros e ordenação por preço/nome, sincronizados com URL e histórico.
+- Personalização em diálogo nativo: retirar ingredientes, selecionar adicionais compatíveis, ponto da carne, observações, quantidade e total atualizado. Combos com hambúrguer, batata e bebida.
+- Carrinho: agrupar configurações iguais, separar diferentes, ajustar até 99 unidades por configuração, remover e esvaziar com confirmação. Todos os cálculos usam centavos inteiros.
+- Checkout com delivery ou retirada, validação amigável, modalidades de pagamento ilustrativas e sucesso demonstrativo.
 - Persistência do carrinho em `localStorage`, recuperação de dados inválidos e atualização entre abas. Quando o armazenamento é indisponível, o carrinho continua em memória.
 - Validação nativa dos formulários, verificação de telefone/data futura nas reservas e confirmação de senha no cadastro.
 - Feedback de adição, estados vazios e fallback de imagem.
 
 ## O que é demonstração
 
-Não há servidor de aplicação, API, banco de dados, autenticação, pagamentos, envio de pedidos, mensagens ou reservas. O carrinho termina no subtotal, sem checkout. Nenhuma disponibilidade, prazo ou rastreamento de entrega é apresentado como real.
+Não há servidor de aplicação, API, banco de dados, autenticação, pagamentos, envio de pedidos, mensagens ou reservas. O checkout permite somente simular o pedido. O frete de R$ 6,00 é fictício, configurável e explicitamente sinalizado; não há consulta de prazo ou região. Nenhuma disponibilidade, prazo ou rastreamento de entrega é apresentado como real.
 
 Os formulários são processados somente em memória, com dados fictícios; as senhas são apagadas após a validação e não são gravadas. Não use dados pessoais ou senhas reais. Não há cookies de autenticação. Os depoimentos, a história, o endereço, o telefone e os horários são fictícios e sinalizados. As imagens foram geradas por IA para este protótipo e são ilustrativas, não fotografias de produtos reais. Poppins e Inter mantêm suas licenças nos respectivos pacotes Fontsource.
 
@@ -86,9 +96,11 @@ Os formulários são processados somente em memória, com dados fictícios; as s
 
 As fotos de bebidas, sobremesas e acompanhamentos usam composição horizontal 3:2, com o produto inteiro e espaço ao redor. A grade mantém essa proporção com `object-fit: contain`, sem recorte ou zoom no hover. Ao substituir fotos, preserve essa composição; os hambúrgueres continuam em PNG transparente.
 
-Edite `data/products.ts` para os produtos e `data/site.ts` para os dados do estabelecimento. Os canais WhatsApp e Instagram começam vazios: a interface exibe seu estado indisponível em vez de links falsos. Apenas URLs HTTPS nos formatos aceitos são exibidas (`https://wa.me/NUMERO` e `https://www.instagram.com/PERFIL`). Não coloque segredos nesses arquivos públicos.
+Edite `data/products.ts` para os produtos (preços em centavos), `data/customization.ts` para adicionais, grupos de combos e frete simulado, e `data/site.ts` para os dados do estabelecimento. Os canais WhatsApp e Instagram começam vazios: a interface exibe seu estado indisponível em vez de links falsos. Apenas URLs HTTPS nos formatos aceitos são exibidas (`https://wa.me/NUMERO` e `https://www.instagram.com/PERFIL`). Não coloque segredos nesses arquivos públicos.
 
 Não há integração externa obrigatória no runtime: imagens, fontes e dados estão locais. O acesso ao registro npm é necessário para instalar dependências.
+
+Consulte [Entrega V2](docs/V2.md) para os arquivos alterados, arquitetura, regras de cálculo, migração e testes específicos da versão.
 
 ## Checklist de revisão manual
 
@@ -98,6 +110,7 @@ Teste em celular, tablet e desktop, com teclado e zoom de 200%:
 - [ ] **Cardápio `/cardapio`:** testar todas as categorias, busca com e sem resultados, limpar filtros, abrir detalhes, percorrer o modal com Tab, fechar com Escape e adicionar produtos.
 - [ ] **Delivery `/delivery`:** conferir os avisos de simulação e os links para cardápio e carrinho; nenhum rastreamento real.
 - [ ] **Carrinho `/carrinho`:** testar vazio, múltiplos produtos, quantidades, subtotal, remoção, recarregamento e abertura em outra aba. Conferir o limite de 99 e que não há pagamento.
+- [ ] **Checkout `/checkout`:** testar carrinho vazio, campos inválidos, delivery com endereço e frete fictício, retirada sem endereço, modalidades de pagamento e sucesso sem pedido real.
 - [ ] **Reservas `/reservas`:** testar campos vazios, telefone inválido, data passada e simulação válida. Confirmar a mensagem de que nenhuma reserva foi realizada.
 - [ ] **Sobre `/sobre`:** conferir história fictícia, valores, imagem e navegação ao cardápio.
 - [ ] **Contato `/contato`:** testar e-mail inválido, mensagem curta e sucesso demonstrativo. Conferir endereço e telefone fictícios, canais desativados e horários.

@@ -1,7 +1,6 @@
 "use client";
 import { Plus, ArrowUpRight } from "lucide-react";
 import { FoodImage } from "@/components/ui/food-image";
-import { useCart } from "@/components/cart-provider";
 import { money } from "@/lib/utils";
 import type { Product } from "@/types";
 export function ProductCard({
@@ -11,7 +10,6 @@ export function ProductCard({
   product: Product;
   onDetails: (product: Product) => void;
 }) {
-  const { add, ready } = useCart();
   return (
     <article className="product-card">
       <button
@@ -26,11 +24,15 @@ export function ProductCard({
             sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 25vw"
           />
         </span>
-        {product.tag && (
+        {(product.tag || product.bestseller || product.originalPriceCents) && (
           <span
             className={`product-tag ${product.id === "veggie" ? "green" : ""}`}
           >
-            {product.tag}
+            {product.originalPriceCents
+              ? "PROMOÇÃO"
+              : product.bestseller
+                ? "MAIS VENDIDO"
+                : product.tag}
           </span>
         )}
         <span className="photo-arrow">
@@ -43,11 +45,15 @@ export function ProductCard({
         </button>
         <p>{product.description}</p>
         <div className="product-bottom">
-          <strong>{money(product.price)}</strong>
+          <span className="card-price">
+            {product.originalPriceCents && (
+              <del>{money(product.originalPriceCents)}</del>
+            )}
+            <strong>{money(product.priceCents)}</strong>
+          </span>
           <button
             className="add-button"
-            disabled={!ready}
-            onClick={() => add(product.id)}
+            onClick={() => onDetails(product)}
             aria-label={`Adicionar ${product.name} ao carrinho`}
           >
             <Plus size={18} />

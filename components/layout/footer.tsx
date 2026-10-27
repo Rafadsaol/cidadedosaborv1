@@ -21,6 +21,7 @@ export function Footer() {
             Nosso cardápio <ArrowUpRight size={14} />
           </Link>
           <Link href="/delivery">Delivery</Link>
+          <Link href="/checkout">Checkout demonstrativo</Link>
           <Link href="/reservas">Reserve sua mesa</Link>
           <Link href="/sobre">Nossa história</Link>
         </div>

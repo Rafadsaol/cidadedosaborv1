@@ -86,7 +86,8 @@ export function HomeHero() {
               disabled={!ready}
               onClick={() => add(product.id)}
             >
-              <Plus size={17} /> Pedir agora <span>{money(product.price)}</span>
+              <Plus size={17} /> Pedir agora{" "}
+              <span>{money(product.priceCents)}</span>
             </button>
             <Link href="/cardapio" className="showcase-menu-link">
               Ver cardápio <ArrowUpRight size={17} />
