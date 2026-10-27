@@ -8,8 +8,10 @@ import {
   ShoppingBag,
   UserRound,
   ArrowUpRight,
+  Search,
+  MapPin,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/components/cart-provider";
 export function Logo() {
   return (
@@ -38,72 +40,110 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const path = usePathname();
   const { count, ready } = useCart();
+  const drawer = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (!open || !drawer.current) return;
+    const element = drawer.current;
+    element.showModal();
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      element.close();
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
   return (
-    <header className="header">
-      <div className="container header-inner">
-        <Logo />
-        <nav className="desktop-nav" aria-label="Navegação principal">
-          {links.map(([href, label]) => (
-            <Link
-              key={href}
-              href={href}
-              className={path === href ? "active" : ""}
-              aria-current={path === href ? "page" : undefined}
+    <>
+      <header
+        className={`header studio-header ${path === "/" ? "header-home" : ""}`}
+      >
+        <div className="container header-inner">
+          <div className="header-left">
+            <button
+              className="icon-button studio-menu"
+              aria-label="Abrir menu"
+              aria-expanded={open}
+              aria-controls="site-navigation"
+              onClick={() => setOpen(true)}
             >
-              {label}
+              <Menu size={23} strokeWidth={1.5} />
+            </button>
+            <span className="header-city">
+              <MapPin size={13} /> SÃO PAULO · SP
+            </span>
+          </div>
+          <Logo />
+          <div className="header-actions">
+            <Link
+              href="/cardapio#product-search"
+              className="icon-button search-link"
+              aria-label="Buscar no cardápio"
+            >
+              <Search size={21} strokeWidth={1.5} />
             </Link>
-          ))}
-        </nav>
-        <div className="header-actions">
-          <Link
-            href="/login"
-            className="icon-button user-button"
-            aria-label="Área do cliente"
-          >
-            <UserRound size={21} />
-          </Link>
-          <Link
-            href="/carrinho"
-            className="cart-link"
-            aria-label={`Carrinho, ${ready ? count : 0} itens`}
-          >
-            <ShoppingBag size={19} />
-            <span className="cart-label">Meu carrinho</span>
-            <span className="cart-count">{ready ? count : 0}</span>
-          </Link>
-          <button
-            className="icon-button mobile-toggle"
-            aria-label={open ? "Fechar menu" : "Abrir menu"}
-            aria-expanded={open}
-            aria-controls="mobile-nav"
-            onClick={() => setOpen(!open)}
-          >
-            {open ? <X /> : <Menu />}
-          </button>
+            <span className="header-divider" />
+            <Link
+              href="/carrinho"
+              className="studio-cart icon-button"
+              aria-label={`Carrinho, ${ready ? count : 0} itens`}
+            >
+              <ShoppingBag size={21} strokeWidth={1.5} />
+              <span className="cart-count">{ready ? count : 0}</span>
+            </Link>
+          </div>
         </div>
-      </div>
-      {open && (
-        <nav
-          id="mobile-nav"
-          className="mobile-nav"
-          aria-label="Navegação móvel"
-        >
-          {links.map(([href, label]) => (
-            <Link
-              key={href}
-              href={href}
+      </header>
+      <dialog
+        ref={drawer}
+        className="navigation-drawer"
+        aria-labelledby="navigation-title"
+        onCancel={() => setOpen(false)}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setOpen(false);
+        }}
+      >
+        <div className="drawer-content">
+          <div className="drawer-top">
+            <span id="navigation-title">EXPLORE A CIDADE</span>
+            <button
+              className="icon-button"
+              autoFocus
+              aria-label="Fechar menu"
               onClick={() => setOpen(false)}
-              aria-current={path === href ? "page" : undefined}
             >
-              {label}
-              <ArrowUpRight size={16} />
+              <X size={23} />
+            </button>
+          </div>
+          <nav id="site-navigation" aria-label="Navegação principal">
+            {links.map(([href, label], i) => (
+              <Link
+                href={href}
+                key={href}
+                onClick={() => setOpen(false)}
+                aria-current={path === href ? "page" : undefined}
+              >
+                <span className="nav-number">0{i + 1}</span>
+                {label}
+                <ArrowUpRight size={21} />
+              </Link>
+            ))}
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="drawer-account"
+            >
+              <UserRound size={19} /> Área do cliente <ArrowUpRight size={18} />
             </Link>
-          ))}
-          <Link href="/login" onClick={() => setOpen(false)}>
-            Área do cliente <UserRound size={16} />
-          </Link>
-        </nav>
-      )}
-    </header>
+          </nav>
+          <div className="drawer-footer">
+            <Flame size={20} />
+            <span>
+              O sabor que domina a cidade.
+              <small>Hamburgueria fictícia · Protótipo demonstrativo.</small>
+            </span>
+          </div>
+        </div>
+      </dialog>
+    </>
   );
 }

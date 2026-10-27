@@ -174,25 +174,18 @@ test("login informa que não cria sessão", async ({ page }) => {
   ).toBeVisible();
 });
 
-test("navegação principal funciona em desktop e mobile", async ({
-  page,
-}, info) => {
+test("navegação por menu funciona em desktop e mobile", async ({ page }) => {
   await page.goto("/");
-  if (info.project.name === "mobile") {
-    await page.getByRole("button", { name: "Abrir menu" }).click();
-    await page
-      .getByRole("navigation", { name: "Navegação móvel", exact: true })
-      .getByRole("link", { name: "Cardápio" })
-      .click();
-    await expect(
-      page.getByRole("button", { name: "Abrir menu" }),
-    ).toBeVisible();
-  } else
-    await page
-      .getByRole("navigation", { name: "Navegação principal", exact: true })
-      .getByRole("link", { name: "Cardápio" })
-      .click();
+  await page.getByRole("button", { name: "Abrir menu" }).click();
+  await expect(
+    page.getByRole("dialog", { name: "EXPLORE A CIDADE" }),
+  ).toBeVisible();
+  await page
+    .getByRole("navigation", { name: "Navegação principal", exact: true })
+    .getByRole("link", { name: "Cardápio" })
+    .click();
   await expect(page).toHaveURL(/cardapio/);
+  await expect(page.getByRole("dialog")).not.toBeVisible();
 });
 
 test("imagens locais carregam e fallback funciona", async ({ page }) => {
@@ -213,6 +206,7 @@ test("imagens locais carregam e fallback funciona", async ({ page }) => {
 test("todos os arquivos de imagem existem", async ({ request }) => {
   for (const name of [
     "hero",
+    "exploded-burger",
     "burger",
     "bacon",
     "double",
@@ -254,4 +248,44 @@ test("acessibilidade automática das nove páginas", async ({ page }) => {
       `${route}: ${JSON.stringify(results.violations.map((v) => ({ id: v.id, nodes: v.nodes.map((n) => n.target) })))}`,
     ).toEqual([]);
   }
+});
+
+test("vitrine troca produtos e adiciona o produto selecionado", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("button", { name: "Destacar Duplo da Cidade" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Próximo hambúrguer" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "Bacon de sobra.",
+  );
+  await page.getByRole("button", { name: "Pedir agora" }).click();
+  await page.getByRole("link", { name: "Ver carrinho →" }).click();
+  await expect(page.locator(".cart-item")).toContainText("Bacon Boulevard");
+  await expect(page.locator(".summary-total")).toContainText("34,90");
+  await page.goto("/");
+  await page.getByRole("button", { name: "Hambúrguer anterior" }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "Feito de plantas.",
+  );
+  await page.getByRole("button", { name: "Destaque 1", exact: true }).click();
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "domina a cidade.",
+  );
+});
+
+test("cabeçalho permite fechar menu com Escape e acessar busca", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Abrir menu" }).click();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(page.getByRole("button", { name: "Abrir menu" })).toBeFocused();
+  await page.getByRole("link", { name: "Buscar no cardápio" }).click();
+  await expect(page).toHaveURL(/cardapio#product-search/);
+  await page.getByLabel("Buscar pelo nome").fill("Bacon");
+  await expect(page.locator(".product-card")).toHaveCount(2);
 });

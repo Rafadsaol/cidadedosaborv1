@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HomeHero } from "@/components/home-hero";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -9,7 +10,6 @@ import {
   Star,
   Quote,
   Check,
-  UtensilsCrossed,
 } from "lucide-react";
 import { FoodImage } from "@/components/ui/food-image";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -18,69 +18,7 @@ import { products } from "@/data/products";
 export default function Home() {
   return (
     <>
-      <section className="hero">
-        <div className="hero-photo">
-          <FoodImage
-            src="/images/hero.webp"
-            alt="Hambúrguer artesanal com cheddar derretido, bacon e pão brioche tostado"
-            priority
-          />
-        </div>
-        <div className="container hero-inner">
-          <div className="hero-content">
-            <span className="eyebrow">
-              <Flame size={15} /> ARTESANAL DE VERDADE. SABOR SEM LIMITES.
-            </span>
-            <h1>
-              O sabor que
-              <br />
-              domina a <span>cidade.</span>
-            </h1>
-            <p>
-              Fogo na chapa. Ingredientes de verdade.
-              <br className="desktop-break" /> E um hambúrguer que você não vai
-              esquecer.
-            </p>
-            <div className="hero-buttons">
-              <Link href="/cardapio" className="button">
-                Ver cardápio <ArrowUpRight size={19} />
-              </Link>
-              <Link href="/cardapio" className="button button-outline">
-                <ShoppingIcon /> Pedir agora
-              </Link>
-            </div>
-            <div className="hero-proof">
-              <div className="avatar-stack">
-                <span>LM</span>
-                <span>AC</span>
-                <span>JP</span>
-              </div>
-              <div>
-                <span className="stars">★★★★★</span>
-                <p>
-                  <strong>Feito para conquistar</strong> na primeira mordida.
-                </p>
-                <span className="small muted">
-                  Conceito visual · avaliações demonstrativas
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="hero-stamp">
-            <Flame size={22} />
-            <span>
-              100%<small>ARTESANAL</small>
-            </span>
-          </div>
-          <div className="hero-caption">
-            <span>O ORIGINAL DA CASA</span>
-            <strong>
-              Cidade Original <span>↗</span>
-            </strong>
-          </div>
-        </div>
-        <div className="hero-bottom-line" />
-      </section>
+      <HomeHero />
       <div className="benefits">
         <div className="container benefits-grid">
           {[
@@ -115,7 +53,7 @@ export default function Home() {
           ))}
         </div>
       </div>
-      <section className="section container">
+      <section className="section container" id="favoritos">
         <div className="section-top">
           <SectionHeading
             eyebrow="OS FAVORITOS DA GALERA"
@@ -282,7 +220,4 @@ export default function Home() {
       </section>
     </>
   );
-}
-function ShoppingIcon() {
-  return <UtensilsCrossed size={18} />;
 }

@@ -67,6 +67,8 @@ playwright.config.ts
 
 ## O que funciona no navegador
 
+- Vitrine inicial com seletor de três hambúrgueres, setas, indicadores e adição do produto em destaque ao carrinho.
+- Cabeçalho com marca centralizada, menu lateral com navegação por teclado, cidade ilustrativa, busca e carrinho.
 - Navegação, menu móvel, busca por nome (sem diferenciar acentos ou maiúsculas) e filtro por categoria.
 - Detalhes do produto em diálogo nativo com foco, Escape e fechamento pelo fundo.
 - Carrinho: adicionar, remover, aumentar/diminuir (até 99 unidades por produto), contar itens e calcular subtotal em reais.
