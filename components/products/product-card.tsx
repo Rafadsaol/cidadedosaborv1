@@ -15,15 +15,17 @@ export function ProductCard({
   return (
     <article className="product-card">
       <button
-        className="product-photo"
+        className={`product-photo ${product.category !== "Hambúrgueres" ? "product-photo--photograph" : ""}`}
         onClick={() => onDetails(product)}
         aria-label={`Ver detalhes de ${product.name}`}
       >
-        <FoodImage
-          src={product.image}
-          alt={product.name}
-          sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 25vw"
-        />
+        <span className="product-photo-frame">
+          <FoodImage
+            src={product.image}
+            alt={product.name}
+            sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 25vw"
+          />
+        </span>
         {product.tag && (
           <span
             className={`product-tag ${product.id === "veggie" ? "green" : ""}`}
