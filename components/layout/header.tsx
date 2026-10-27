@@ -69,7 +69,7 @@ export function Header() {
               <Menu size={23} strokeWidth={1.5} />
             </button>
             <span className="header-city">
-              <MapPin size={13} /> SÃO PAULO · SP
+              <MapPin size={13} /> Curitiba-PR
             </span>
           </div>
           <Logo />
