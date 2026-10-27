@@ -16,7 +16,7 @@ import { products } from "@/data/products";
 const slides = [
   {
     id: "duplo",
-    image: "/images/exploded-burger.webp",
+    image: "/images/exploded-burger.png",
     label: "CAMADAS DE PURO SABOR",
     title: (
       <>
@@ -30,7 +30,7 @@ const slides = [
   },
   {
     id: "bacon",
-    image: "/images/bacon.webp",
+    image: "/images/bacon-cutout.png",
     label: "CROCÂNCIA EM OUTRO NÍVEL",
     title: (
       <>
@@ -44,7 +44,7 @@ const slides = [
   },
   {
     id: "veggie",
-    image: "/images/veggie.webp",
+    image: "/images/veggie-cutout.png",
     label: "VERDE. AUTÊNTICO. SURPREENDENTE.",
     title: (
       <>
@@ -117,14 +117,7 @@ export function HomeHero() {
                       aria-pressed={i === index}
                     >
                       <span className="thumbnail-image">
-                        <FoodImage
-                          src={
-                            i === 0
-                              ? "/images/exploded-burger.webp"
-                              : item.image
-                          }
-                          alt=""
-                        />
+                        <FoodImage src={item.image} alt="" sizes="100px" />
                       </span>
                       <span className="thumbnail-name">{p.name}</span>
                     </button>
@@ -152,9 +145,7 @@ export function HomeHero() {
             </div>
           </div>
         </div>
-        <div
-          className={`showcase-visual ${index === 0 ? "is-exploded" : "is-photo"}`}
-        >
+        <div className="showcase-visual">
           <span className="showcase-orbit" aria-hidden="true" />
           <span className="vertical-note">
             BLEND EXCLUSIVO · FEITO NA HORA · 100% ARTESANAL
@@ -167,6 +158,7 @@ export function HomeHero() {
                   ? "Hambúrguer artesanal com pão, alface, tomate, cheddar e carnes em camadas suspensas"
                   : product.name
               }
+              sizes="(max-width: 640px) 85vw, (max-width: 900px) 45vw, 650px"
               priority
             />
           </div>

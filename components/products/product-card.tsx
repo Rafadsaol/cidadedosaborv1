@@ -19,7 +19,11 @@ export function ProductCard({
         onClick={() => onDetails(product)}
         aria-label={`Ver detalhes de ${product.name}`}
       >
-        <FoodImage src={product.image} alt={product.name} />
+        <FoodImage
+          src={product.image}
+          alt={product.name}
+          sizes="(max-width: 640px) 100vw, (max-width: 900px) 50vw, 25vw"
+        />
         {product.tag && (
           <span
             className={`product-tag ${product.id === "veggie" ? "green" : ""}`}

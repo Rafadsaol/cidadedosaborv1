@@ -103,18 +103,30 @@ test("reserva valida telefone e confirma somente simulação", async ({
   page,
 }) => {
   await page.goto("/reservas");
-  await page.getByLabel("Seu nome").fill("Visitante Teste");
-  await page.getByLabel("Telefone com DDD").fill("123");
+  await page
+    .locator("form:visible")
+    .getByLabel("Seu nome")
+    .fill("Visitante Teste");
+  await page.locator("form:visible").getByLabel("Telefone com DDD").fill("123");
   const date = new Date();
   date.setDate(date.getDate() + 2);
   const value = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-  await page.getByLabel("Data", { exact: true }).fill(value);
-  await page.getByLabel("Horário", { exact: true }).selectOption("19:00");
+  await page
+    .locator("form:visible")
+    .getByLabel("Data", { exact: true })
+    .fill(value);
+  await page
+    .locator("form:visible")
+    .getByLabel("Horário", { exact: true })
+    .selectOption("19:00");
   await page.getByRole("button", { name: "Simular reserva" }).click();
-  await expect(page.locator("form").getByRole("alert")).toContainText(
+  await expect(page.locator("form:visible").getByRole("alert")).toContainText(
     "telefone com DDD",
   );
-  await page.getByLabel("Telefone com DDD").fill("11999999999");
+  await page
+    .locator("form:visible")
+    .getByLabel("Telefone com DDD")
+    .fill("11999999999");
   await page.getByRole("button", { name: "Simular reserva" }).click();
   await expect(
     page.getByText("Simulação concluída! Nenhuma reserva real foi realizada."),
@@ -124,10 +136,21 @@ test("reserva valida telefone e confirma somente simulação", async ({
 test("contato valida formulário sem enviar mensagens", async ({ page }) => {
   await page.goto("/contato");
   await page.getByRole("button", { name: "Simular envio" }).click();
-  await expect(page.locator("input:invalid").first()).toBeVisible();
-  await page.getByLabel("Seu nome").fill("Visitante Teste");
-  await page.getByLabel("E-mail", { exact: true }).fill("teste@example.com");
-  await page.getByLabel("Assunto").selectOption("Sugestões");
+  await expect(
+    page.locator("form:visible input:invalid").first(),
+  ).toBeVisible();
+  await page
+    .locator("form:visible")
+    .getByLabel("Seu nome")
+    .fill("Visitante Teste");
+  await page
+    .locator("form:visible")
+    .getByLabel("E-mail", { exact: true })
+    .fill("teste@example.com");
+  await page
+    .locator("form:visible")
+    .getByLabel("Assunto")
+    .selectOption("Sugestões");
   await page
     .getByLabel("Sua mensagem")
     .fill("Mensagem fictícia para testar a interface.");
@@ -140,20 +163,32 @@ test("contato valida formulário sem enviar mensagens", async ({ page }) => {
 
 test("cadastro verifica confirmação e não guarda senha", async ({ page }) => {
   await page.goto("/cadastro");
-  await page.getByLabel("Seu nome").fill("Visitante Teste");
-  await page.getByLabel("E-mail", { exact: true }).fill("teste@example.com");
-  await page.locator('[name="password"]').fill("SenhaTeste123");
-  await page.getByLabel("Confirme a senha").fill("OutraSenha123");
+  await page
+    .locator("form:visible")
+    .getByLabel("Seu nome")
+    .fill("Visitante Teste");
+  await page
+    .locator("form:visible")
+    .getByLabel("E-mail", { exact: true })
+    .fill("teste@example.com");
+  await page.locator('form:visible [name="password"]').fill("SenhaTeste123");
+  await page
+    .locator("form:visible")
+    .getByLabel("Confirme a senha")
+    .fill("OutraSenha123");
   await page.getByRole("button", { name: "Simular cadastro" }).click();
-  await expect(page.locator("form").getByRole("alert")).toContainText(
+  await expect(page.locator("form:visible").getByRole("alert")).toContainText(
     "senhas precisam ser iguais",
   );
-  await page.getByLabel("Confirme a senha").fill("SenhaTeste123");
+  await page
+    .locator("form:visible")
+    .getByLabel("Confirme a senha")
+    .fill("SenhaTeste123");
   await page.getByRole("button", { name: "Simular cadastro" }).click();
   await expect(
     page.getByText("Nenhuma conta foi criada", { exact: false }),
   ).toBeVisible();
-  await expect(page.locator('[name="password"]')).toHaveValue("");
+  await expect(page.locator('form:visible [name="password"]')).toHaveValue("");
   expect(
     await page.evaluate(() =>
       JSON.stringify({
@@ -166,8 +201,11 @@ test("cadastro verifica confirmação e não guarda senha", async ({ page }) => 
 
 test("login informa que não cria sessão", async ({ page }) => {
   await page.goto("/login");
-  await page.getByLabel("E-mail", { exact: true }).fill("teste@example.com");
-  await page.locator('[name="password"]').fill("SenhaTeste123");
+  await page
+    .locator("form:visible")
+    .getByLabel("E-mail", { exact: true })
+    .fill("teste@example.com");
+  await page.locator('form:visible [name="password"]').fill("SenhaTeste123");
   await page.getByRole("button", { name: "Visualizar acesso" }).click();
   await expect(
     page.getByText("Nenhuma sessão foi iniciada", { exact: false }),
@@ -204,7 +242,7 @@ test("imagens locais carregam e fallback funciona", async ({ page }) => {
 });
 
 test("todos os arquivos de imagem existem", async ({ request }) => {
-  for (const name of [
+  const photos = [
     "hero",
     "exploded-burger",
     "burger",
@@ -218,10 +256,25 @@ test("todos os arquivos de imagem existem", async ({ request }) => {
     "lemonade",
     "brownie",
     "shake",
-  ]) {
-    const response = await request.get(`/images/${name}.webp`);
-    expect(response.status(), name).toBe(200);
-    expect(response.headers()["content-type"]).toContain("image/webp");
+  ];
+  const cutouts = [
+    "exploded-burger",
+    "burger-cutout",
+    "bacon-cutout",
+    "double-cutout",
+    "veggie-cutout",
+  ];
+  for (const [names, extension] of [
+    [photos, "webp"],
+    [cutouts, "png"],
+  ] as const) {
+    for (const name of names) {
+      const response = await request.get(`/images/${name}.${extension}`);
+      expect(response.status(), name).toBe(200);
+      expect(response.headers()["content-type"]).toContain(
+        `image/${extension}`,
+      );
+    }
   }
 });
 

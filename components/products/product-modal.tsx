@@ -47,7 +47,11 @@ export function ProductModal({
             <X />
           </button>
           <div className="modal-photo">
-            <FoodImage src={product.image} alt={product.name} />
+            <FoodImage
+              src={product.image}
+              alt={product.name}
+              sizes="(max-width: 640px) 90vw, 700px"
+            />
           </div>
           <div className="modal-body">
             <span className="eyebrow">{product.category}</span>

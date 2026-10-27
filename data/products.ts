@@ -13,7 +13,7 @@ export const products: Product[] = [
     description: "O clássico da casa. Simples no nome, gigante no sabor.",
     price: 29.9,
     category: "Hambúrgueres",
-    image: "/images/burger.webp",
+    image: "/images/burger-cutout.png",
     tag: "MAIS PEDIDO",
     ingredients: [
       "Pão brioche",
@@ -31,7 +31,7 @@ export const products: Product[] = [
       "Bacon crocante, cheddar derretido e uma combinação de respeito.",
     price: 34.9,
     category: "Hambúrgueres",
-    image: "/images/bacon.webp",
+    image: "/images/bacon-cutout.png",
     tag: "FAVORITO DA GALERA",
     ingredients: [
       "Pão brioche",
@@ -48,7 +48,7 @@ export const products: Product[] = [
     description: "Duas carnes, dobro de cheddar. Para uma fome à altura.",
     price: 39.9,
     category: "Hambúrgueres",
-    image: "/images/double.webp",
+    image: "/images/double-cutout.png",
     ingredients: [
       "Pão brioche",
       "Dois blends bovinos 160g",
@@ -63,7 +63,7 @@ export const products: Product[] = [
     description: "Grão-de-bico, vegetais frescos e personalidade de sobra.",
     price: 32.9,
     category: "Hambúrgueres",
-    image: "/images/veggie.webp",
+    image: "/images/veggie-cutout.png",
     tag: "VEGETARIANO",
     ingredients: [
       "Pão de fermentação natural",

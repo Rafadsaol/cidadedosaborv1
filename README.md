@@ -1,6 +1,6 @@
 # Cidade do Sabor — versão 1.0
 
-Frontend demonstrativo de uma hamburgueria fictícia, criado com Next.js App Router, TypeScript, Tailwind CSS 4 e Lucide React. Identidade escura, vermelho e laranja, tipografia Poppins e Inter (Google Fonts distribuídas localmente via Fontsource), imagens locais em WebP e componentes reutilizáveis.
+Frontend demonstrativo de uma hamburgueria fictícia, criado com Next.js App Router, TypeScript, Tailwind CSS 4 e Lucide React. Identidade escura, vermelho e laranja, tipografia Poppins e Inter (Google Fonts distribuídas localmente via Fontsource), fotografias locais em WebP e hambúrgueres em PNG transparente e componentes reutilizáveis.
 
 ## Executar no VS Code
 
