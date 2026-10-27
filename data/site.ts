@@ -2,7 +2,7 @@
 export const site = {
   name: "Cidade do Sabor",
   slogan: "O sabor que domina a cidade.",
-  address: "Rua do Sabor, 123 · Centro · São Paulo, SP",
+  address: "Rua do Sabor, 123 · Centro · Curitiba, PR",
   phone: "(11) 0000-0000",
   whatsapp: "",
   instagram: "",

@@ -13,7 +13,7 @@ export function Footer() {
             <br />
             Servido com personalidade.
           </p>
-          <span className="small-label">SÃO PAULO · DESDE 2020</span>
+          <span className="small-label">CURITIBA · DESDE 2020</span>
         </div>
         <div>
           <h3>Explore a cidade</h3>
