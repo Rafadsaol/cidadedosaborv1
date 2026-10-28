@@ -139,3 +139,46 @@ test("checkout exige endereço no delivery e dispensa na retirada", () => {
     }),
   ).toEqual({});
 });
+
+test("V3 preserva snapshots e centavos ao criar pedidos locais", async () => {
+  const { createOrder } = await import("@/lib/demo");
+  const cart = parseCart([{ productId: "cidade", quantity: 2, configuration: { extraIds: ["cheddar"] } }]);
+  const order = createOrder(cart, products, { ...emptyCheckout, name: "Teste", phone: "41999990000", fulfillment: "pickup" });
+  expect(order?.totalCents).toBe(6780);
+  expect(order?.status).toBe("Recebido");
+  expect(order?.items[0].details).toContain("+ Cheddar extra");
+  const changed = products.map(p => ({ ...p, priceCents: 100 }));
+  expect(createOrder(cart, changed, { ...emptyCheckout, name: "Teste", phone: "41999990000", fulfillment: "pickup" })?.totalCents).toBe(1000);
+  expect(order?.totalCents).toBe(6780);
+  expect(createOrder(cart, [], { ...emptyCheckout, name: "Teste", phone: "41999990000", fulfillment: "pickup" })).toBeNull();
+});
+test("V3 valida dados persistidos, transições finais e relatórios", async () => {
+  const { initialDemo, parseDemo, updateOrderStatus, reportData } = await import("@/lib/demo");
+  const state = initialDemo();
+  expect(parseDemo(state)).toEqual(state);
+  expect(parseDemo({ version: 9 })).toBeNull();
+  const forged = structuredClone(state); forged.orders[0].totalCents = 1;
+  expect(parseDemo(forged)?.orders.length).toBe(state.orders.length - 1);
+  const received = state.orders[0];
+  expect(updateOrderStatus(received, "Concluído")).toEqual(received);
+  const preparing = updateOrderStatus(received, "Em preparação");
+  expect(preparing.history).toHaveLength(received.history.length + 1);
+  const cancelled = updateOrderStatus(preparing, "Cancelado");
+  expect(updateOrderStatus(cancelled, "Recebido")).toEqual(cancelled);
+  expect(reportData(state.orders, false).revenueCents).toBe(0);
+  const report = reportData(state.orders, true);
+  expect(report.revenueCents).toBe(state.orders.filter(o => o.status === "Concluído").reduce((sum, o) => sum + o.totalCents, 0));
+  expect(report.statuses.reduce((sum, s) => sum + s.value, 0)).toBe(14);
+});
+test("V3 produtos criados localmente funcionam no carrinho e na personalização", async () => {
+  const { validProduct } = await import("@/lib/demo");
+  const custom = { ...product("cidade"), id: "burger-novo", name: "Novo Burger", priceCents: 4590 };
+  expect(validProduct(custom)).toBe(true);
+  expect(validProduct({ ...custom, image: "https://external.example/photo.jpg" })).toBe(false);
+  const configuration = normalizeConfiguration(custom, { extraIds: ["bacon"] });
+  const cart = parseCart([{ productId: custom.id, quantity: 1, configuration }], [custom]);
+  expect(cartSubtotalCents(cart, [custom])).toBe(5090);
+  expect(parseCart(cart, [{ ...custom, available: false }])).toEqual([]);
+  expect(normalizeConfiguration({ ...custom, category: "Bebidas" }, configuration).extraIds).toEqual([]);
+  expect(normalizeConfiguration({ ...product("combo"), category: "Bebidas" }).combo).toEqual({});
+});

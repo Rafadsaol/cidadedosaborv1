@@ -1,4 +1,4 @@
-# Cidade do Sabor — versão 2.0
+# Cidade do Sabor — versão 3.0 demonstrativa
 
 Frontend demonstrativo de uma hamburgueria fictícia, criado com Next.js App Router, TypeScript, Tailwind CSS 4 e Lucide React. Identidade escura, vermelho e laranja, tipografia Poppins e Inter (Google Fonts distribuídas localmente via Fontsource), fotografias locais em WebP e hambúrgueres em PNG transparente e componentes reutilizáveis.
 
@@ -55,7 +55,9 @@ app/
   reservas/                # Formulário de simulação
   sobre/                   # História fictícia da marca
   contato/                 # Formulário e canais configuráveis
-  login/ e cadastro/       # Interfaces visuais
+  login/ e cadastro/       # Escolha de perfis demo sem senha
+  meus-pedidos/            # Histórico local do Cliente Teste
+  admin/                  # Painel e telas de gestão V3
   layout.tsx, globals.css  # Estrutura e identidade visual
   error.tsx, loading.tsx, not-found.tsx
 components/
@@ -63,6 +65,8 @@ components/
   products/                # Catálogo, ordenação e personalização
   checkout/                # Formulário e resumo detalhado
   ui/                      # Imagens com fallback, títulos e avisos
+  demo-provider.tsx        # Estado da operação V3 e serviços locais
+  admin/, orders/          # Gestão, gráficos e histórico de pedidos
   cart-provider.tsx        # Estado, limites, persistência e feedback
   cart-page.tsx, demo-form.tsx, auth-page.tsx
 data/
@@ -80,23 +84,15 @@ tests/logic.spec.ts         # Preços, armazenamento e validação
 playwright.config.ts
 ```
 
-## O que funciona no navegador
+## V3: operação demonstrativa
 
-- Vitrine inicial com seletor de três hambúrgueres, setas, indicadores e adição do produto em destaque ao carrinho.
-- Cabeçalho com marca centralizada, menu lateral com navegação por teclado, cidade ilustrativa, busca e carrinho.
-- Navegação, busca em tempo real sem diferenciar acentos, filtros e ordenação por preço/nome, sincronizados com URL e histórico.
-- Personalização em diálogo nativo: retirar ingredientes, selecionar adicionais compatíveis, ponto da carne, observações, quantidade e total atualizado. Combos com hambúrguer, batata e bebida.
-- Carrinho: agrupar configurações iguais, separar diferentes, ajustar até 99 unidades por configuração, remover e esvaziar com confirmação. Todos os cálculos usam centavos inteiros.
-- Checkout com delivery ou retirada, validação amigável, modalidades de pagamento ilustrativas e sucesso demonstrativo.
-- Persistência do carrinho em `localStorage`, recuperação de dados inválidos e atualização entre abas. Quando o armazenamento é indisponível, o carrinho continua em memória.
-- Validação nativa dos formulários, verificação de telefone/data futura nas reservas e confirmação de senha no cadastro.
-- Feedback de adição, estados vazios e fallback de imagem.
+Além do cardápio, personalização e carrinho da V2, a V3 inclui checkout com registro local de pedidos, histórico do cliente, reservas persistidas e painel administrativo com dashboard, gestão de pedidos/produtos/reservas, clientes fictícios, relatórios e restauração com confirmação.
 
-## O que é demonstração
+Abra `/login` e escolha **Cliente Demo (Cliente Teste)** ou **Administrador Demo (Administrador)**. Não é necessário informar senha. O painel fica em `/admin`; o histórico em `/meus-pedidos`.
 
-Não há servidor de aplicação, API, banco de dados, autenticação, pagamentos, envio de pedidos, mensagens ou reservas. O checkout permite somente simular o pedido. O frete de R$ 6,00 é fictício, configurável e explicitamente sinalizado; não há consulta de prazo ou região. Nenhuma disponibilidade, prazo ou rastreamento de entrega é apresentado como real.
+Todos os fluxos são demonstrativos. Nada é enviado ao restaurante, nenhum pagamento é processado e nenhuma reserva real é efetuada. Use dados fictícios: os dados de teste ficam no localStorage deste navegador. Computador e celular têm armazenamentos separados; abas da mesma origem acompanham as mudanças.
 
-Os formulários são processados somente em memória, com dados fictícios; as senhas são apagadas após a validação e não são gravadas. Não use dados pessoais ou senhas reais. Não há cookies de autenticação. Os depoimentos, a história, o endereço, o telefone e os horários são fictícios e sinalizados. As imagens foram geradas por IA para este protótipo e são ilustrativas, não fotografias de produtos reais. Poppins e Inter mantêm suas licenças nos respectivos pacotes Fontsource.
+Consulte [Entrega V3](docs/V3.md) para funcionalidades, arquivos, acessos, regras dos relatórios, verificações, checklist de testes, limitações e pontos preparados para futura integração com backend. [Entrega V2](docs/V2.md) permanece como documentação histórica.
 
 ## Configuração futura
 
@@ -106,23 +102,11 @@ Edite `data/products.ts` para os produtos (preços em centavos), `data/customiza
 
 Não há integração externa obrigatória no runtime: imagens, fontes e dados estão locais. O acesso ao registro npm é necessário para instalar dependências.
 
-Consulte [Entrega V2](docs/V2.md) para os arquivos alterados, arquitetura, regras de cálculo, migração e testes específicos da versão.
+Os gráficos locais usam React/SVG e tabelas acessíveis; não há dependência de API ou CDN. A descrição de todos os arquivos da V3 está em [Entrega V3](docs/V3.md#arquivos-e-arquitetura).
 
 ## Checklist de revisão manual
 
-Teste em celular, tablet e desktop, com teclado e zoom de 200%:
-
-- [ ] **Início `/`:** conferir imagem principal, CTAs, benefícios, favoritos, combo, história, avaliações identificadas e rodapé.
-- [ ] **Cardápio `/cardapio`:** testar todas as categorias, busca com e sem resultados, limpar filtros, abrir detalhes, percorrer o modal com Tab, fechar com Escape e adicionar produtos.
-- [ ] **Delivery `/delivery`:** conferir os avisos de simulação e os links para cardápio e carrinho; nenhum rastreamento real.
-- [ ] **Carrinho `/carrinho`:** testar vazio, múltiplos produtos, quantidades, subtotal, remoção, recarregamento e abertura em outra aba. Conferir o limite de 99 e que não há pagamento.
-- [ ] **Checkout `/checkout`:** testar carrinho vazio, campos inválidos, delivery com endereço e frete fictício, retirada sem endereço, modalidades de pagamento e sucesso sem pedido real.
-- [ ] **Reservas `/reservas`:** testar campos vazios, telefone inválido, data passada e simulação válida. Confirmar a mensagem de que nenhuma reserva foi realizada.
-- [ ] **Sobre `/sobre`:** conferir história fictícia, valores, imagem e navegação ao cardápio.
-- [ ] **Contato `/contato`:** testar e-mail inválido, mensagem curta e sucesso demonstrativo. Conferir endereço e telefone fictícios, canais desativados e horários.
-- [ ] **Login `/login`:** testar campos obrigatórios, mostrar/ocultar senha e mensagem sem sessão real.
-- [ ] **Cadastro `/cadastro`:** testar senhas diferentes, senha curta e simulação válida; confirmar que os campos são limpos e nenhuma conta é criada.
-- [ ] **Global:** testar menu móvel, link para pular ao conteúdo, foco visível, imagens/fallback, página 404 e ausência de rolagem horizontal.
+Use o [checklist da V3](docs/V3.md#checklist-de-exploração) para conferir a loja e a operação no celular, tablet e desktop, incluindo teclado e zoom de 200%.
 
 ## Ambiente na nuvem
 

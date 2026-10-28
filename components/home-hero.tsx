@@ -12,7 +12,8 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { FoodImage } from "@/components/ui/food-image";
 import { useCart } from "@/components/cart-provider";
 import { money } from "@/lib/utils";
-import { products } from "@/data/products";
+import { products as originalProducts } from "@/data/products";
+import { useDemo } from "@/components/demo-provider";
 const slides = [
   {
     id: "duplo",
@@ -80,9 +81,11 @@ export function HomeHero() {
   );
   const motionDirection = useRef(1);
   const { add, ready } = useCart();
+  const { products } = useDemo();
   const activeIndex = motion?.to ?? index;
   const slide = slides[activeIndex];
-  const product = products.find((p) => p.id === slide.id)!;
+  const liveProduct = products.find((p) => p.id === slide.id);
+  const product = liveProduct || originalProducts.find(p => p.id === slide.id)!;
   const thumbnailOrder = [-2, -1, 0, 1, 2].map((offset) => wrap(index + offset));
   const selectedSlot = motion ? 2 + motion.direction : 2;
   const firstVisibleSlot = motion ? 1 + motion.direction : 1;
@@ -278,7 +281,7 @@ export function HomeHero() {
           <div className="showcase-buttons">
             <button
               className="button showcase-order"
-              disabled={!ready}
+              disabled={!ready || !liveProduct || liveProduct.available === false}
               onClick={() => add(product.id)}
             >
               <Plus size={17} /> Pedir agora{" "}
@@ -313,7 +316,7 @@ export function HomeHero() {
                 <div className="burger-track" ref={track} data-moving={motion ? "true" : undefined}>
                   {thumbnailOrder.map((i, slot) => {
                     const item = slides[i];
-                    const p = products.find(p => p.id === item.id)!;
+                    const p = products.find(p => p.id === item.id) || originalProducts.find(p => p.id === item.id)!;
                     const visible = slot >= firstVisibleSlot && slot <= firstVisibleSlot + 2;
                     return (
                       <button
@@ -376,7 +379,7 @@ export function HomeHero() {
                 alt={
                   i === 0
                     ? "Hambúrguer artesanal com pão, alface, tomate, cheddar e carnes em camadas suspensas"
-                    : products.find((p) => p.id === item.id)!.name
+                    : originalProducts.find((p) => p.id === item.id)!.name
                 }
                 sizes="(max-width: 640px) 85vw, (max-width: 900px) 45vw, 650px"
                 quality={90}

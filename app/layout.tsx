@@ -7,9 +7,9 @@ import "@fontsource/poppins/600.css";
 import "@fontsource/poppins/700.css";
 import "@fontsource/poppins/800.css";
 import "./globals.css";
+import { DemoProvider } from "@/components/demo-provider";
 import { CartProvider } from "@/components/cart-provider";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
+import { SiteFrame } from "@/components/site-frame";
 import { Toast } from "@/components/ui/toast";
 export const metadata: Metadata = {
   title: {
@@ -26,15 +26,12 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-        <CartProvider>
-          <a href="#main" className="skip-link">
-            Pular para o conteúdo
-          </a>
-          <Header />
-          <main id="main">{children}</main>
-          <Footer />
-          <Toast />
-        </CartProvider>
+        <DemoProvider>
+          <CartProvider>
+            <SiteFrame>{children}</SiteFrame>
+            <Toast />
+          </CartProvider>
+        </DemoProvider>
       </body>
     </html>
   );

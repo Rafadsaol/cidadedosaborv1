@@ -1,4 +1,5 @@
-import { products } from "@/data/products";
+"use client";
+import { useDemo } from "@/components/demo-provider";
 import { checkoutSettings } from "@/data/customization";
 import { unitPriceCents, cartSubtotalCents } from "@/lib/cart";
 import { money } from "@/lib/utils";
@@ -11,7 +12,8 @@ export function OrderSummary({
   items: CartItem[];
   delivery: boolean;
 }) {
-  const subtotal = cartSubtotalCents(items);
+  const { products } = useDemo();
+  const subtotal = cartSubtotalCents(items, products);
   const freight = delivery ? checkoutSettings.deliveryFeeCents : 0;
   return (
     <aside className="summary order-summary">

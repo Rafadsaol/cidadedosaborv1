@@ -10,21 +10,22 @@ import {
   Store,
   WalletCards,
 } from "lucide-react";
+import { useDemo } from "@/components/demo-provider";
+import { OrderDetails } from "@/components/orders/order-details";
+import type { DemoOrder } from "@/types/demo";
 import { useCart } from "@/components/cart-provider";
 import { OrderSummary } from "./order-summary";
 import { states } from "@/data/customization";
 import { emptyCheckout, paymentLabels, validateCheckout } from "@/lib/checkout";
-import type { CartItem, CheckoutData } from "@/types";
+import type { CheckoutData } from "@/types";
 export function CheckoutPage() {
-  const { items, ready } = useCart();
+  const { items, ready, clear } = useCart();
+  const { placeOrder, orders, persistent } = useDemo();
   const [data, setData] = useState<CheckoutData>(emptyCheckout);
   const [errors, setErrors] = useState<
     Partial<Record<keyof CheckoutData, string>>
   >({});
-  const [result, setResult] = useState<{
-    data: CheckoutData;
-    items: CartItem[];
-  } | null>(null);
+  const [result, setResult] = useState<DemoOrder | null>(null);
   const form = useRef<HTMLFormElement>(null);
   const success = useRef<HTMLDivElement>(null);
   const change = (key: keyof CheckoutData, value: string) => {
@@ -82,55 +83,16 @@ export function CheckoutPage() {
         <div className="success-heading">
           <CheckCircle2 size={55} />
           <span className="eyebrow">SIMULAÇÃO CONCLUÍDA</span>
-          <h2>Tudo pronto para imaginar seu próximo pedido.</h2>
+          <h2>Seu pedido de teste foi recebido.</h2>
           <p>
             <strong>Nenhum pedido foi enviado ao restaurante.</strong> Nenhum
             pagamento foi processado, nenhuma entrega ou retirada foi agendada.
           </p>
         </div>
-        <div className="checkout-layout">
-          <div className="form-panel">
-            <h3>Dados usados nesta demonstração</h3>
-            <p>
-              {result.data.name} · {result.data.phone}
-            </p>
-            <p>
-              {result.data.fulfillment === "delivery"
-                ? "Delivery simulado"
-                : "Retirada no balcão simulada"}
-            </p>
-            {result.data.fulfillment === "delivery" && (
-              <p>
-                {result.data.street}, {result.data.number}
-                {result.data.complement ? ` · ${result.data.complement}` : ""}
-                <br />
-                {result.data.neighborhood} · {result.data.city}/
-                {result.data.state} · CEP {result.data.cep}
-                {result.data.reference && (
-                  <>
-                    <br />
-                    Referência: {result.data.reference}
-                  </>
-                )}
-              </p>
-            )}
-            <p>
-              Forma de pagamento ilustrativa:{" "}
-              {paymentLabels[result.data.payment]} · sem cobrança.
-            </p>
-            <div className="info-box">
-              <Info size={18} />
-              Os dados deste formulário ficam apenas nesta tela, em memória. Seu
-              carrinho foi mantido para outros testes.
-            </div>
-            <Link href="/cardapio" className="button">
-              Voltar ao cardápio <ArrowRight size={18} />
-            </Link>
-          </div>
-          <OrderSummary
-            items={result.items}
-            delivery={result.data.fulfillment === "delivery"}
-          />
+        <div className="form-panel">
+          <OrderDetails order={orders.find(o => o.id === result.id) || result} />
+          <div className="info-box"><Info size={18} />{persistent ? "Pedido de teste salvo no histórico deste navegador. Seu carrinho foi esvaziado para o próximo teste." : "Armazenamento indisponível. Este pedido está somente na memória desta aba."}</div>
+          <div className="demo-action-row"><Link href="/meus-pedidos" className="button">Acompanhar pedido <ArrowRight size={18} /></Link><Link href="/cardapio" className="text-link">Voltar ao cardápio</Link></div>
         </div>
       </div>
     );
@@ -164,7 +126,10 @@ export function CheckoutPage() {
               ?.focus();
             return;
           }
-          setResult({ data: { ...data }, items: structuredClone(items) });
+          const order = placeOrder(items, data);
+          if (!order) { setErrors({ name: "Não foi possível registrar. Revise o carrinho e tente novamente." }); return; }
+          setResult(order);
+          clear();
           setData(emptyCheckout);
           requestAnimationFrame(() => {
             success.current?.focus();
@@ -179,8 +144,7 @@ export function CheckoutPage() {
           <Info size={18} />
           <span>
             Checkout exclusivamente demonstrativo. Use dados fictícios. Nenhum
-            pedido é enviado, nenhum pagamento é feito e nenhum dado do
-            formulário é salvo no navegador.
+            pedido real é enviado e nenhum pagamento é feito. Os dados fictícios informados serão salvos apenas neste navegador.
           </span>
         </div>
         <fieldset className="checkout-section">

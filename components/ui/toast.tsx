@@ -1,9 +1,13 @@
 "use client";
 import Link from "next/link";
 import { CheckCircle2, X } from "lucide-react";
+import { useDemo } from "@/components/demo-provider";
 import { useCart } from "@/components/cart-provider";
 export function Toast() {
-  const { notice, clearNotice } = useCart();
+  const cart = useCart();
+  const demo = useDemo();
+  const notice = demo.notice || cart.notice;
+  const clearNotice = () => { demo.clearNotice(); cart.clearNotice(); };
   return (
     <div className="toast-region" role="status" aria-live="polite">
       {notice && (
@@ -11,7 +15,7 @@ export function Toast() {
           <CheckCircle2 size={21} />
           <span>
             {notice}
-            <Link href="/carrinho">Ver carrinho →</Link>
+            {!demo.notice && <Link href="/carrinho">Ver carrinho →</Link>}
           </span>
           <button
             className="icon-button"

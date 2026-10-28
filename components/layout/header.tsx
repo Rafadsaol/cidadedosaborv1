@@ -12,6 +12,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useDemo } from "@/components/demo-provider";
 import { useCart } from "@/components/cart-provider";
 export function Logo() {
   return (
@@ -33,10 +34,12 @@ const links = [
   ["/cardapio", "Cardápio"],
   ["/delivery", "Delivery"],
   ["/reservas", "Reservas"],
+  ["/meus-pedidos", "Meus pedidos"],
   ["/sobre", "Sobre nós"],
   ["/contato", "Contato"],
 ];
 export function Header() {
+  const { profile } = useDemo();
   const [open, setOpen] = useState(false);
   const path = usePathname();
   const { count, ready } = useCart();
@@ -115,6 +118,7 @@ export function Header() {
             </button>
           </div>
           <nav id="site-navigation" aria-label="Navegação principal">
+            {profile === "admin" && <Link href="/admin" onClick={() => setOpen(false)}>Painel administrativo <ArrowUpRight size={21} /></Link>}
             {links.map(([href, label], i) => (
               <Link
                 href={href}
@@ -132,7 +136,7 @@ export function Header() {
               onClick={() => setOpen(false)}
               className="drawer-account"
             >
-              <UserRound size={19} /> Área do cliente <ArrowUpRight size={18} />
+              <UserRound size={19} /> {profile === "admin" ? "Administrador Demo · trocar" : profile === "customer" ? "Cliente Teste · trocar" : "Escolher perfil demo"} <ArrowUpRight size={18} />
             </Link>
           </nav>
           <div className="drawer-footer">

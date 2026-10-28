@@ -7,7 +7,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { products } from "@/data/products";
+import { useDemo } from "./demo-provider";
+import type { Product } from "@/types";
 import {
   CART_KEY,
   MAX_QUANTITY,
@@ -34,28 +35,33 @@ type CartContextValue = {
   clearNotice: () => void;
 };
 const CartContext = createContext<CartContextValue | null>(null);
-function readCart(): CartItem[] {
+function readCart(products: Product[]): CartItem[] {
   try {
-    return parseCart(JSON.parse(localStorage.getItem(CART_KEY) || "[]"));
+    return parseCart(JSON.parse(localStorage.getItem(CART_KEY) || "[]"), products);
   } catch {
     return [];
   }
 }
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const { products, ready: catalogReady } = useDemo();
+  const [storedItems, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
   const [notice, setNotice] = useState("");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const skipPersist = useRef(false);
+  const items = parseCart({ version: 2, items: storedItems }, products);
+  const catalog = useRef(products);
+  useEffect(() => { catalog.current = products; }, [products]);
   useEffect(() => {
+    if (!catalogReady) return;
     const id = setTimeout(() => {
-      setItems(readCart());
+      setItems(readCart(catalog.current));
       setReady(true);
     }, 0);
     const sync = (event: StorageEvent) => {
       if (event.key === CART_KEY || event.key === null) {
         skipPersist.current = true;
-        setItems(readCart());
+        setItems(readCart(catalog.current));
       }
     };
     window.addEventListener("storage", sync);
@@ -63,7 +69,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       clearTimeout(id);
       window.removeEventListener("storage", sync);
     };
-  }, []);
+  }, [catalogReady]);
   useEffect(() => {
     if (!ready) return;
     if (skipPersist.current) {
@@ -71,11 +77,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     try {
-      localStorage.setItem(CART_KEY, JSON.stringify({ version: 2, items }));
+      localStorage.setItem(CART_KEY, JSON.stringify({ version: 2, items: storedItems }));
     } catch {
       /* Continua disponível em memória. */
     }
-  }, [items, ready]);
+  }, [storedItems, ready]);
+  useEffect(() => {
+    if (!ready) return;
+    const timer = setTimeout(() => setItems(previous => {
+      const normalized = parseCart({ version: 2, items: previous }, products);
+      return JSON.stringify(previous) === JSON.stringify(normalized) ? previous : normalized;
+    }), 0);
+    return () => clearTimeout(timer);
+  }, [products, ready]);
   useEffect(
     () => () => {
       if (timer.current) clearTimeout(timer.current);
@@ -89,7 +103,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
   const add = useCallback(
     (id: string, input?: Partial<ProductConfiguration>, quantity = 1) => {
-      const product = products.find((p) => p.id === id);
+      const product = products.find((p) => p.id === id && p.available !== false);
       if (!product || !Number.isSafeInteger(quantity) || quantity < 1) return;
       const configuration = normalizeConfiguration(product, input);
       const key = configurationKey(id, configuration);
@@ -104,7 +118,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         );
         return;
       }
-      setItems((previous) => {
+      setItems((stored) => {
+        const previous = parseCart({ version: 2, items: stored }, products);
         const found = previous.find((i) => i.key === key);
         return found
           ? previous.map((i) =>
@@ -129,7 +144,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       });
       announce(`${product.name} adicionado ao carrinho`);
     },
-    [announce, items],
+    [announce, items, products],
   );
   const remove = (key: string) => {
     setItems((previous) => previous.filter((i) => i.key !== key));
@@ -157,7 +172,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         items,
         ready,
         count: items.reduce((sum, i) => sum + i.quantity, 0),
-        subtotalCents: cartSubtotalCents(items),
+        subtotalCents: cartSubtotalCents(items, products),
         add,
         update,
         remove,

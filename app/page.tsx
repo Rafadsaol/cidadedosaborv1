@@ -13,8 +13,7 @@ import {
 } from "lucide-react";
 import { FoodImage } from "@/components/ui/food-image";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { ProductGrid } from "@/components/products/product-grid";
-import { products } from "@/data/products";
+import { HomeFavorites } from "@/components/products/home-favorites";
 export default function Home() {
   return (
     <>
@@ -64,7 +63,7 @@ export default function Home() {
             Explorar cardápio <ArrowRight size={17} />
           </Link>
         </div>
-        <ProductGrid products={products.slice(0, 4)} />
+        <HomeFavorites />
       </section>
       <section className="container">
         <div className="combo-banner">

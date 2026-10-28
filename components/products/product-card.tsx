@@ -53,11 +53,12 @@ export function ProductCard({
           </span>
           <button
             className="add-button"
+            disabled={product.available === false}
             onClick={() => onDetails(product)}
             aria-label={`Adicionar ${product.name} ao carrinho`}
           >
             <Plus size={18} />
-            <span>Adicionar</span>
+            <span>{product.available === false ? "Indisponível" : "Adicionar"}</span>
           </button>
         </div>
       </div>

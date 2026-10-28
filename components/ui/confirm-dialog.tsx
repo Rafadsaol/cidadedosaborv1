@@ -1,14 +1,23 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 export function ConfirmDialog({
   open,
   onClose,
   onConfirm,
+  title = "Esvaziar seu carrinho?",
+  description = "Todos os produtos e personalizações serão removidos deste navegador.",
+  confirmLabel = "Sim, esvaziar",
+  cancelLabel = "Manter carrinho",
 }: {
   open: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  title?: string;
+  description?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
 }) {
+  const titleId = useId();
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     if (!open || !dialog.current) return;
@@ -26,15 +35,13 @@ export function ConfirmDialog({
       className="confirm-dialog"
       ref={dialog}
       onCancel={onClose}
-      aria-labelledby="clear-cart-title"
+      aria-labelledby={titleId}
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <h2 id="clear-cart-title">Esvaziar seu carrinho?</h2>
-      <p>
-        Todos os produtos e personalizações serão removidos deste navegador.
-      </p>
+      <h2 id={titleId}>{title}</h2>
+      <p>{description}</p>
       <div className="confirm-actions">
         <button
           type="button"
@@ -42,7 +49,7 @@ export function ConfirmDialog({
           autoFocus
           onClick={onClose}
         >
-          Manter carrinho
+          {cancelLabel}
         </button>
         <button
           type="button"
@@ -52,7 +59,7 @@ export function ConfirmDialog({
             onClose();
           }}
         >
-          Sim, esvaziar
+          {confirmLabel}
         </button>
       </div>
     </dialog>

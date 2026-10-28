@@ -1,13 +1,15 @@
 "use client";
 import { useState } from "react";
 import { Plus, SlidersHorizontal } from "lucide-react";
-import { extras, productOptions, donenessLabels } from "@/data/customization";
+import { extras, donenessLabels } from "@/data/customization";
 import {
   normalizeConfiguration,
+  optionsForProduct,
   unitPriceCents,
   configurationSummary,
 } from "@/lib/cart";
 import { money } from "@/lib/utils";
+import { useDemo } from "@/components/demo-provider";
 import { useCart } from "@/components/cart-provider";
 import { QuantityControl } from "@/components/ui/quantity-control";
 import type { Product, ProductConfiguration, Doneness } from "@/types";
@@ -23,7 +25,9 @@ export function ProductCustomizer({
   );
   const [quantity, setQuantity] = useState(1);
   const { add, ready } = useCart();
-  const options = productOptions[product.id];
+  const { products } = useDemo();
+  const available = products.some(p => p.id === product.id && p.available !== false);
+  const options = optionsForProduct(product);
   const unit = unitPriceCents(product, configuration);
   const patch = (next: Partial<ProductConfiguration>) =>
     setConfiguration((current) =>
@@ -222,8 +226,8 @@ export function ProductCustomizer({
         <span>
           Total<strong aria-live="polite">{money(unit * quantity)}</strong>
         </span>
-        <button className="button" disabled={!ready} type="submit">
-          <Plus size={18} /> Adicionar ao carrinho
+        <button className="button" disabled={!ready || !available} type="submit">
+          <Plus size={18} /> {available ? "Adicionar ao carrinho" : "Produto indisponível"}
         </button>
       </div>
       <p className="small muted customizer-demo">

@@ -1,6 +1,6 @@
 import { CalendarDays, Users, UtensilsCrossed } from "lucide-react";
 import { PageHeading } from "@/components/ui/section-heading";
-import { DemoForm } from "@/components/demo-form";
+import { ReservationForm } from "@/components/reservation-form";
 export const metadata = { title: "Reservas" };
 export default function Page() {
   return (
@@ -48,7 +48,7 @@ export default function Page() {
           <p className="muted">
             Preencha os dados para experimentar o formulário.
           </p>
-          <DemoForm kind="reservation" />
+          <ReservationForm />
         </div>
       </section>
     </>

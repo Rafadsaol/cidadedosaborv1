@@ -159,8 +159,10 @@ test("checkout valida delivery, simula pagamento sem campos financeiros", async 
     }),
   ).toBeVisible();
   const stored = await page.evaluate(() => JSON.stringify({ ...localStorage }));
-  expect(stored).not.toContain("Cliente Fictício");
-  expect(stored).not.toContain("11999999999");
+  expect(stored).toContain("Cliente Fictício");
+  expect(stored).toContain("11999999999");
+  await expect(page.getByRole("link", { name: "Carrinho, 0 itens" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Acompanhar pedido" })).toBeVisible();
 });
 
 test("retirada dispensa endereço e frete, checkout vazio é tratado", async ({

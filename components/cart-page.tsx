@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Plus, Trash2, ShoppingBag, ArrowRight, Info } from "lucide-react";
 import { useCart } from "./cart-provider";
-import { products } from "@/data/products";
+import { useDemo } from "@/components/demo-provider";
 import { FoodImage } from "./ui/food-image";
 import { QuantityControl } from "./ui/quantity-control";
 import { ConfirmDialog } from "./ui/confirm-dialog";
@@ -11,6 +11,7 @@ import { ItemDetails } from "./products/item-details";
 import { unitPriceCents } from "@/lib/cart";
 import { money } from "@/lib/utils";
 export function CartPage() {
+  const { products } = useDemo();
   const { items, ready, subtotalCents, count, update, remove, clear } =
     useCart();
   const [confirm, setConfirm] = useState(false);

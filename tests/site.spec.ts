@@ -166,55 +166,23 @@ test("contato valida formulário sem enviar mensagens", async ({ page }) => {
   await expect(page.getByText("WhatsApp ainda não configurado")).toBeVisible();
 });
 
-test("cadastro verifica confirmação e não guarda senha", async ({ page }) => {
+test("cadastro oferece perfis prontos sem solicitar senha", async ({ page }) => {
   await page.goto("/cadastro");
-  await page
-    .locator("form:visible")
-    .getByLabel("Seu nome")
-    .fill("Visitante Teste");
-  await page
-    .locator("form:visible")
-    .getByLabel("E-mail", { exact: true })
-    .fill("teste@example.com");
-  await page.locator('form:visible [name="password"]').fill("SenhaTeste123");
-  await page
-    .locator("form:visible")
-    .getByLabel("Confirme a senha")
-    .fill("OutraSenha123");
-  await page.getByRole("button", { name: "Simular cadastro" }).click();
-  await expect(page.locator("form:visible").getByRole("alert")).toContainText(
-    "senhas precisam ser iguais",
-  );
-  await page
-    .locator("form:visible")
-    .getByLabel("Confirme a senha")
-    .fill("SenhaTeste123");
-  await page.getByRole("button", { name: "Simular cadastro" }).click();
-  await expect(
-    page.getByText("Nenhuma conta foi criada", { exact: false }),
-  ).toBeVisible();
-  await expect(page.locator('form:visible [name="password"]')).toHaveValue("");
-  expect(
-    await page.evaluate(() =>
-      JSON.stringify({
-        local: { ...localStorage },
-        session: { ...sessionStorage },
-      }),
-    ),
-  ).not.toContain("SenhaTeste123");
+  await expect(page.getByRole("heading", { name: "Escolha seu perfil." })).toBeVisible();
+  await expect(page.locator('input[type="password"]')).toHaveCount(0);
+  await page.getByRole("button", { name: /Cliente Demo/ }).click();
+  await expect(page).toHaveURL(/meus-pedidos/);
+  await page.reload();
+  const profile = await page.evaluate(() => JSON.parse(localStorage.getItem("cidade-do-sabor:demo:v3") || "{}").profile);
+  expect(profile).toBe("customer");
 });
 
-test("login informa que não cria sessão", async ({ page }) => {
+test("login permite explorar administrador sem senha", async ({ page }) => {
   await page.goto("/login");
-  await page
-    .locator("form:visible")
-    .getByLabel("E-mail", { exact: true })
-    .fill("teste@example.com");
-  await page.locator('form:visible [name="password"]').fill("SenhaTeste123");
-  await page.getByRole("button", { name: "Visualizar acesso" }).click();
-  await expect(
-    page.getByText("Nenhuma sessão foi iniciada", { exact: false }),
-  ).toBeVisible();
+  await page.getByRole("button", { name: /Administrador Demo/ }).click();
+  await expect(page).toHaveURL(/admin$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Sua operação, em um olhar.");
+  await expect(page.locator('input[type="password"]')).toHaveCount(0);
 });
 
 test("navegação por menu funciona em desktop e mobile", async ({ page }) => {

@@ -1,7 +1,8 @@
 "use client";
 import { Search, UtensilsCrossed, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { categories, products } from "@/data/products";
+import { categories } from "@/data/products";
+import { useDemo } from "@/components/demo-provider";
 import { ProductGrid } from "./product-grid";
 const normalize = (text: string) =>
   text
@@ -27,6 +28,7 @@ function readFilters(): Filters {
   };
 }
 export function Catalog() {
+  const { products } = useDemo();
   const [filters, setFilters] = useState(defaults);
   useEffect(() => {
     const timer = setTimeout(() => setFilters(readFilters()), 0);
@@ -68,7 +70,7 @@ export function Catalog() {
                 ? a.name.localeCompare(b.name, "pt-BR")
                 : Number(!!b.bestseller) - Number(!!a.bestseller),
         ),
-    [filters],
+    [filters, products],
   );
   return (
     <section className="container catalog">

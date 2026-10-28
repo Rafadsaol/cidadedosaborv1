@@ -12,7 +12,10 @@ export function ProductGrid({ products }: { products: Product[] }) {
           <ProductCard key={p.id} product={p} onDetails={setSelected} />
         ))}
       </div>
-      <ProductModal product={selected} onClose={() => setSelected(null)} />
+      <ProductModal
+        product={products.find((product) => product.id === selected?.id) || null}
+        onClose={() => setSelected(null)}
+      />
     </>
   );
 }

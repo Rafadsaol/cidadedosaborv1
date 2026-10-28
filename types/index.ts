@@ -7,6 +7,7 @@ export interface Product {
   priceCents: number;
   originalPriceCents?: number;
   bestseller?: boolean;
+  available?: boolean;
   category: Category;
   image: string;
   tag?: string;

@@ -7,12 +7,26 @@ const record = (v: unknown): Record<string, unknown> =>
   v !== null && typeof v === "object" && !Array.isArray(v)
     ? (v as Record<string, unknown>)
     : {};
+export function optionsForProduct(product: Product) {
+  const specific = Object.hasOwn(productOptions, product.id)
+    ? productOptions[product.id]
+    : undefined;
+  if (product.category === "Hambúrgueres") {
+    return specific && !specific.comboGroups
+      ? specific
+      : { ...productOptions.cidade, removableIngredients: product.ingredients };
+  }
+  if (product.category === "Combos") {
+    return specific?.comboGroups ? specific : productOptions.combo;
+  }
+  return undefined;
+}
 export function normalizeConfiguration(
   product: Product,
   input?: unknown,
 ): ProductConfiguration {
   const raw = record(input);
-  const options = productOptions[product.id];
+  const options = optionsForProduct(product);
   const selected = record(raw.combo);
   const combo: Record<string, string> = {};
   for (const group of options?.comboGroups || []) {
@@ -84,7 +98,7 @@ export function unitPriceCents(
     (sum, id) => sum + extras.find((e) => e.id === id)!.priceCents,
     0,
   );
-  const choices = (productOptions[product.id]?.comboGroups || []).reduce(
+  const choices = (optionsForProduct(product)?.comboGroups || []).reduce(
     (sum, group) =>
       sum +
       group.choices.find((c) => c.id === safe.combo[group.id])!.priceCents *
@@ -99,7 +113,7 @@ export function configurationSummary(
 ): string[] {
   const safe = normalizeConfiguration(product, configuration);
   return [
-    ...(productOptions[product.id]?.comboGroups || []).map(
+    ...(optionsForProduct(product)?.comboGroups || []).map(
       (g) =>
         `${g.name}: ${g.choices.find((c) => c.id === safe.combo[g.id])!.name}`,
     ),
@@ -110,7 +124,7 @@ export function configurationSummary(
     ...safe.extraIds.map((id) => `+ ${extras.find((e) => e.id === id)!.name}`),
   ];
 }
-export function parseCart(input: unknown): CartItem[] {
+export function parseCart(input: unknown, catalog: Product[] = products): CartItem[] {
   const object = record(input);
   const list = Array.isArray(input)
     ? input
@@ -120,7 +134,7 @@ export function parseCart(input: unknown): CartItem[] {
   const merged = new Map<string, CartItem>();
   for (const entry of list.slice(0, 100)) {
     const value = record(entry);
-    const product = products.find((p) => p.id === value.productId);
+    const product = catalog.find((p) => p.id === value.productId && p.available !== false);
     if (
       !product ||
       !Number.isSafeInteger(value.quantity) ||
@@ -137,9 +151,9 @@ export function parseCart(input: unknown): CartItem[] {
   }
   return [...merged.values()];
 }
-export function cartSubtotalCents(items: CartItem[]) {
+export function cartSubtotalCents(items: CartItem[], catalog: Product[] = products) {
   return items.reduce((sum, item) => {
-    const product = products.find((p) => p.id === item.productId);
+    const product = catalog.find((p) => p.id === item.productId);
     return (
       sum +
       (product
