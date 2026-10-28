@@ -19,6 +19,12 @@ A cópia local no VS Code e o ambiente na nuvem são checkouts separados. Arquiv
 
 No PowerShell, se houver bloqueio de `npm.ps1`, use `npm.cmd ci` e `npm.cmd run dev`.
 
+### Testar no celular pela rede Wi-Fi
+
+Conecte o celular e o computador à mesma rede e execute `npm.cmd run dev` no PowerShell. Em outro terminal, use `ipconfig` e procure o Endereço IPv4 da conexão Wi-Fi. Abra `http://IP-DO-COMPUTADOR:3000` no navegador do celular, usando a porta exibida pelo servidor. Mantenha o computador e o servidor ligados; se o Windows solicitar acesso para o Node.js, permita em redes privadas.
+
+O servidor escuta em `0.0.0.0`, e `next.config.ts` permite os endereços IPv4 das interfaces locais para as conexões de desenvolvimento. Isso evita que a página abra sem iniciar os botões por bloqueio da conexão do Next.js. Reinicie o servidor se o IP mudar ou após atualizar essa configuração.
+
 ## Verificações
 
 ```bash
