@@ -8,7 +8,7 @@ import {
   Flame,
   Plus,
 } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FoodImage } from "@/components/ui/food-image";
 import { useCart } from "@/components/cart-provider";
 import { money } from "@/lib/utils";
@@ -57,10 +57,17 @@ const slides = [
       "Grão-de-bico, vegetais frescos e molho de ervas. Nosso jeito de provar que um grande burger vai muito além da carne.",
   },
 ];
+type CarouselMotion = { from: number; to: number; direction: number };
+const wrap = (value: number) => (value + slides.length) % slides.length;
 export function HomeHero() {
   const [index, setIndex] = useState(0);
-  const thumbnailNodes = useRef(new Map<string, HTMLButtonElement>());
-  const previousPositions = useRef(new Map<string, number>());
+  const [motion, setMotion] = useState<CarouselMotion | null>(null);
+  const settledIndex = useRef(0);
+  const desiredIndex = useRef(0);
+  const currentMotion = useRef<CarouselMotion | null>(null);
+  const queuedFrame = useRef<number | null>(null);
+  const restoreTrackFocus = useRef(false);
+  const track = useRef<HTMLDivElement>(null);
   const animations = useRef<Animation[]>([]);
   const intro = useRef<HTMLDivElement>(null);
   const heroNodes = useRef(new Map<string, HTMLDivElement>());
@@ -69,69 +76,107 @@ export function HomeHero() {
   );
   const motionDirection = useRef(1);
   const { add, ready } = useCart();
-  const slide = slides[index];
+  const activeIndex = motion?.to ?? index;
+  const slide = slides[activeIndex];
   const product = products.find((p) => p.id === slide.id)!;
-  const thumbnailOrder = [-1, 0, 1].map(
-    (offset) => (index + offset + slides.length) % slides.length,
-  );
-  const select = (next: number) => {
-    if (next === index) return;
-    motionDirection.current =
-      (next - index + slides.length) % slides.length === 1 ? 1 : -1;
-    previousPositions.current = new Map(
-      [...thumbnailNodes.current].map(([id, node]) => [
-        id,
-        node.getBoundingClientRect().left,
-      ]),
-    );
+  const thumbnailOrder = [-2, -1, 0, 1, 2].map((offset) => wrap(index + offset));
+  const selectedSlot = motion ? 2 + motion.direction : 2;
+  const firstVisibleSlot = motion ? 1 + motion.direction : 1;
+
+  const beginStep = useCallback((from: number, to: number) => {
+    if (from === to) return;
+    const nextMotion = { from, to, direction: wrap(to - from) === 1 ? 1 : -1 };
+    motionDirection.current = nextMotion.direction;
     previousHeroStyles.current = new Map(
       [...heroNodes.current].map(([id, node]) => {
         const style = window.getComputedStyle(node);
         return [id, { opacity: style.opacity, transform: style.transform }];
       }),
     );
-    setIndex(next);
+    currentMotion.current = nextMotion;
+    setMotion(nextMotion);
+  }, []);
+  const finishStep = useCallback(
+    (expected: CarouselMotion) => {
+      if (currentMotion.current !== expected) return;
+      restoreTrackFocus.current = !!track.current?.contains(document.activeElement);
+      settledIndex.current = expected.to;
+      currentMotion.current = null;
+      setIndex(expected.to);
+      setMotion(null);
+      if (desiredIndex.current !== expected.to) {
+        queuedFrame.current = requestAnimationFrame(() => {
+          queuedFrame.current = requestAnimationFrame(() => {
+            queuedFrame.current = null;
+            if (!currentMotion.current) {
+              beginStep(settledIndex.current, desiredIndex.current);
+            }
+          });
+        });
+      }
+    },
+    [beginStep],
+  );
+  const select = (next: number) => {
+    desiredIndex.current = next;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      restoreTrackFocus.current = !!track.current?.contains(document.activeElement);
+      currentMotion.current = null;
+      settledIndex.current = next;
+      setMotion(null);
+      setIndex(next);
+      return;
+    }
+    if (!currentMotion.current) beginStep(settledIndex.current, next);
   };
   const change = (direction: number) =>
-    select((index + direction + slides.length) % slides.length);
+    select(wrap(desiredIndex.current + direction));
+
+  useLayoutEffect(() => {
+    if (!motion || !track.current) return;
+    const element = track.current;
+    const card = element.firstElementChild as HTMLElement | null;
+    if (!card) return;
+    const step =
+      card.getBoundingClientRect().width +
+      parseFloat(getComputedStyle(element).columnGap);
+    const animation = element.animate(
+      [
+        { transform: `translateX(${-step}px)` },
+        { transform: `translateX(${-step * (1 + motion.direction)}px)` },
+      ],
+      {
+        duration: 950,
+        easing: "cubic-bezier(0.35, 0, 0.2, 1)",
+        fill: "forwards",
+      },
+    );
+    animation.onfinish = () => finishStep(motion);
+    return () => {
+      animation.onfinish = null;
+      animation.cancel();
+    };
+  }, [motion, finishStep]);
+
   useLayoutEffect(() => {
     animations.current.forEach((animation) => animation.cancel());
     animations.current = [];
-    if (!previousPositions.current.size) return;
+    if (!previousHeroStyles.current.size) return;
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      for (const [id, node] of thumbnailNodes.current) {
-        const before = previousPositions.current.get(id);
-        if (before === undefined) continue;
-        const distance = before - node.getBoundingClientRect().left;
-        if (Math.abs(distance) < 1) continue;
-        animations.current.push(
-          node.animate(
-            [
-              { translate: `${distance}px 0`, offset: 0 },
-              { translate: `${distance * 0.45}px -8px`, offset: 0.48 },
-              { translate: "0px 0", offset: 1 },
-            ],
-            { duration: 740, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
-          ),
-        );
-      }
       for (const [id, node] of heroNodes.current) {
         const before = previousHeroStyles.current.get(id);
         if (!before) continue;
-        const selected = id === slides[index].id;
+        const selected = id === slides[activeIndex].id;
         if (!selected && Number(before.opacity) < 0.01) continue;
-        const entry = `translateX(${motionDirection.current * 72}px) scale(0.94) rotate(${motionDirection.current * 3}deg)`;
-        const exit = `translateX(${motionDirection.current * -64}px) scale(0.94) rotate(${motionDirection.current * -3}deg)`;
+        const entry = `translateX(${motionDirection.current * 144}px) scale(0.93) rotate(${motionDirection.current * 3}deg)`;
+        const exit = `translateX(${motionDirection.current * -120}px) scale(0.93) rotate(${motionDirection.current * -3}deg)`;
         animations.current.push(
           node.animate(
             [
-              {
-                opacity: before.opacity,
-                transform: Number(before.opacity) > 0.01 ? before.transform : entry,
-              },
+              { opacity: before.opacity, transform: Number(before.opacity) > 0.01 ? before.transform : entry },
               { opacity: selected ? 1 : 0, transform: selected ? "none" : exit },
             ],
-            { duration: 780, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
+            { duration: 900, easing: "cubic-bezier(0.35, 0, 0.2, 1)" },
           ),
         );
       }
@@ -140,25 +185,34 @@ export function HomeHero() {
           animations.current.push(
             element.animate(
               [
-                { opacity: 0, transform: "translateY(12px)" },
+                { opacity: 0, transform: "translateY(16px)" },
                 { opacity: 1, transform: "translateY(0)" },
               ],
-              {
-                duration: 520,
-                delay: position * 75,
-                easing: "cubic-bezier(0.25, 0.1, 0.25, 1)",
-                fill: "backwards",
-              },
+              { duration: 620, delay: position * 85, easing: "ease-out", fill: "backwards" },
             ),
           );
         });
       }
     }
-    previousPositions.current.clear();
     previousHeroStyles.current.clear();
-  }, [index]);
+  }, [activeIndex]);
+  useLayoutEffect(() => {
+    const focused = document.activeElement;
+    if (
+      !motion && track.current &&
+      (restoreTrackFocus.current || track.current.contains(focused))
+    ) {
+      track.current
+        .querySelector<HTMLButtonElement>('[aria-pressed="true"]')
+        ?.focus({ preventScroll: true });
+      restoreTrackFocus.current = false;
+    }
+  }, [index, motion]);
   useEffect(
-    () => () => animations.current.forEach((animation) => animation.cancel()),
+    () => () => {
+      animations.current.forEach((animation) => animation.cancel());
+      if (queuedFrame.current !== null) cancelAnimationFrame(queuedFrame.current);
+    },
     [],
   );
   return (
@@ -209,34 +263,30 @@ export function HomeHero() {
                 <ArrowLeft size={19} />
               </button>
               <div className="burger-thumbnails">
-                {thumbnailOrder.map((i) => {
-                  const item = slides[i];
-                  const p = products.find((p) => p.id === item.id)!;
-                  return (
-                    <button
-                      key={item.id}
-                      ref={(node) => {
-                        if (node) thumbnailNodes.current.set(item.id, node);
-                        else thumbnailNodes.current.delete(item.id);
-                      }}
-                      className={`burger-thumbnail ${i === index ? "is-selected" : ""}`}
-                      onClick={() => select(i)}
-                      aria-label={`Destacar ${p.name}`}
-                      aria-pressed={i === index}
-                    >
-                      <span className="thumbnail-image">
-                        <FoodImage
-                          src={item.image}
-                          alt=""
-                          sizes="256px"
-                          quality={90}
-                          loading="eager"
-                        />
-                      </span>
-                      <span className="thumbnail-name">{p.name}</span>
-                    </button>
-                  );
-                })}
+                <div className="burger-track" ref={track} data-moving={motion ? "true" : undefined}>
+                  {thumbnailOrder.map((i, slot) => {
+                    const item = slides[i];
+                    const p = products.find(p => p.id === item.id)!;
+                    const visible = slot >= firstVisibleSlot && slot <= firstVisibleSlot + 2;
+                    return (
+                      <button
+                        key={slot}
+                        className={`burger-thumbnail ${slot === selectedSlot ? "is-selected" : ""}`}
+                        onClick={() => select(i)}
+                        aria-label={`Destacar ${p.name}`}
+                        aria-pressed={slot === selectedSlot}
+                        aria-hidden={!visible}
+                        tabIndex={visible ? 0 : -1}
+                        disabled={!visible}
+                      >
+                        <span className="thumbnail-image">
+                          <FoodImage key={item.id} src={item.image} alt="" sizes="256px" quality={90} loading="eager" />
+                        </span>
+                        <span className="thumbnail-name">{p.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
               <button
                 className="selector-arrow"
@@ -251,9 +301,9 @@ export function HomeHero() {
                 <button
                   key={item.id}
                   onClick={() => select(i)}
-                  className={i === index ? "is-selected" : ""}
+                  className={i === activeIndex ? "is-selected" : ""}
                   aria-label={`Destaque ${i + 1}`}
-                  aria-pressed={i === index}
+                  aria-pressed={i === activeIndex}
                 />
               ))}
             </div>
@@ -266,13 +316,13 @@ export function HomeHero() {
           </span>
           {slides.map((item, i) => (
             <div
-              className={`showcase-food ${i === index ? "is-active" : ""}`}
+              className={`showcase-food ${i === activeIndex ? "is-active" : ""}`}
               key={item.id}
               ref={(node) => {
                 if (node) heroNodes.current.set(item.id, node);
                 else heroNodes.current.delete(item.id);
               }}
-              aria-hidden={i !== index}
+              aria-hidden={i !== activeIndex}
             >
               <FoodImage
                 src={item.image}
@@ -306,7 +356,7 @@ export function HomeHero() {
           Explore os sabores <ArrowDown size={15} />
         </a>
         <span className="showcase-counter">
-          0{index + 1} <span>/ 03</span>
+          0{activeIndex + 1} <span>/ 03</span>
         </span>
       </div>
     </section>
