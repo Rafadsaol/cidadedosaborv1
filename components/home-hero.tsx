@@ -62,6 +62,9 @@ export function HomeHero() {
   const { add, ready } = useCart();
   const slide = slides[index];
   const product = products.find((p) => p.id === slide.id)!;
+  const thumbnailOrder = [-1, 0, 1].map(
+    (offset) => (index + offset + slides.length) % slides.length,
+  );
   const change = (direction: number) =>
     setIndex((value) => (value + direction + slides.length) % slides.length);
   return (
@@ -107,7 +110,8 @@ export function HomeHero() {
                 <ArrowLeft size={19} />
               </button>
               <div className="burger-thumbnails">
-                {slides.map((item, i) => {
+                {thumbnailOrder.map((i) => {
+                  const item = slides[i];
                   const p = products.find((p) => p.id === item.id)!;
                   return (
                     <button
@@ -118,7 +122,7 @@ export function HomeHero() {
                       aria-pressed={i === index}
                     >
                       <span className="thumbnail-image">
-                        <FoodImage src={item.image} alt="" sizes="100px" />
+                        <FoodImage src={item.image} alt="" sizes="160px" />
                       </span>
                       <span className="thumbnail-name">{p.name}</span>
                     </button>

@@ -3070,7 +3070,7 @@ img {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 15px;
+  margin-top: 64px;
 }
 .selector-arrow {
   display: flex;
@@ -3099,6 +3099,7 @@ img {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 11px;
   flex: 1;
+  perspective: 700px;
 }
 .burger-thumbnail {
   position: relative;
@@ -3112,33 +3113,65 @@ img {
     border-color 0.2s,
     background 0.2s;
   min-width: 0;
+  overflow: visible;
+  transform-style: preserve-3d;
 }
 .burger-thumbnail.is-selected {
   border-color: #b48b4c;
-  background: #39332b66;
+  background: linear-gradient(145deg, #443a2d, #24211e);
+  box-shadow:
+    0 12px 22px #0006,
+    inset 0 1px 0 #ffb34728;
+  transform: translateY(-3px);
+  z-index: 2;
 }
 .burger-thumbnail.is-selected:before {
   content: "";
   position: absolute;
-  left: calc(50% - 4px);
-  top: -9px;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid var(--orange);
+  left: calc(50% - 7px);
+  top: -60px;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 9px solid var(--orange);
+  filter: drop-shadow(0 3px 5px #ffb34730);
+  pointer-events: none;
+  z-index: 3;
+}
+.burger-thumbnail.is-selected:after {
+  content: "";
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  bottom: 23px;
+  height: 13px;
+  border-radius: 50%;
+  background: #0009;
+  filter: blur(6px);
+  pointer-events: none;
 }
 .thumbnail-image {
   display: block;
   position: relative;
   height: 65px;
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 8px 8px 0 0;
+  z-index: 1;
 }
 .thumbnail-image .food-image {
   object-fit: contain;
   padding: 4px;
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
+}
+.burger-thumbnail.is-selected .food-image {
+  transform: translate3d(0, -24px, 24px) scale(1.5) rotate(-3deg);
+  filter: drop-shadow(2px 14px 8px #0009);
 }
 .thumbnail-name {
+  position: relative;
+  z-index: 2;
   display: block;
   font-size: 7px;
   line-height: 1.4;
@@ -3575,7 +3608,7 @@ img {
     letter-spacing: 1.6px;
   }
   .selector-row {
-    margin-top: 16px;
+    margin-top: 64px;
     gap: 7px;
   }
   .burger-thumbnails {
