@@ -59,9 +59,13 @@ const slides = [
 ];
 type CarouselMotion = { from: number; to: number; direction: number };
 const wrap = (value: number) => (value + slides.length) % slides.length;
+const MOTION_PREFERENCE_KEY = "cidade-do-sabor:showcase-full-motion";
 export function HomeHero() {
   const [index, setIndex] = useState(0);
   const [motion, setMotion] = useState<CarouselMotion | null>(null);
+  const [systemReducedMotion, setSystemReducedMotion] = useState(false);
+  const [fullMotionEnabled, setFullMotionEnabled] = useState(false);
+  const fullMotionOverride = useRef(false);
   const settledIndex = useRef(0);
   const desiredIndex = useRef(0);
   const currentMotion = useRef<CarouselMotion | null>(null);
@@ -82,6 +86,40 @@ export function HomeHero() {
   const thumbnailOrder = [-2, -1, 0, 1, 2].map((offset) => wrap(index + offset));
   const selectedSlot = motion ? 2 + motion.direction : 2;
   const firstVisibleSlot = motion ? 1 + motion.direction : 1;
+  const reducedMotion = systemReducedMotion && !fullMotionEnabled;
+
+  useEffect(() => {
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const synchronize = () => setSystemReducedMotion(preference.matches);
+    const timer = setTimeout(() => {
+      synchronize();
+      try {
+        const enabled = sessionStorage.getItem(MOTION_PREFERENCE_KEY) === "true";
+        fullMotionOverride.current = enabled;
+        setFullMotionEnabled(enabled);
+      } catch { /* A escolha continua disponível nesta página. */ }
+    }, 0);
+    preference.addEventListener("change", synchronize);
+    return () => {
+      clearTimeout(timer);
+      preference.removeEventListener("change", synchronize);
+    };
+  }, []);
+
+  const toggleFullMotion = () => {
+    const enabled = !fullMotionOverride.current;
+    fullMotionOverride.current = enabled;
+    setFullMotionEnabled(enabled);
+    try { sessionStorage.setItem(MOTION_PREFERENCE_KEY, String(enabled)); } catch { /* Sem persistência. */ }
+    if (!enabled) {
+      animations.current.forEach((animation) => animation.cancel());
+      if (queuedFrame.current !== null) cancelAnimationFrame(queuedFrame.current);
+      currentMotion.current = null;
+      settledIndex.current = desiredIndex.current;
+      setMotion(null);
+      setIndex(desiredIndex.current);
+    }
+  };
 
   const beginStep = useCallback((from: number, to: number) => {
     if (from === to) return;
@@ -119,7 +157,7 @@ export function HomeHero() {
   );
   const select = (next: number) => {
     desiredIndex.current = next;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches && !fullMotionOverride.current) {
       restoreTrackFocus.current = !!track.current?.contains(document.activeElement);
       currentMotion.current = null;
       settledIndex.current = next;
@@ -162,7 +200,7 @@ export function HomeHero() {
     animations.current.forEach((animation) => animation.cancel());
     animations.current = [];
     if (!previousHeroStyles.current.size) return;
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches || fullMotionOverride.current) {
       for (const [id, node] of heroNodes.current) {
         const before = previousHeroStyles.current.get(id);
         if (!before) continue;
@@ -220,6 +258,7 @@ export function HomeHero() {
       className="showcase"
       aria-label="Destaques da Cidade do Sabor"
       aria-roledescription="carrossel"
+      data-full-motion={fullMotionEnabled ? "true" : undefined}
     >
       <div className="showcase-grid">
         <div className="showcase-copy">
@@ -254,6 +293,14 @@ export function HomeHero() {
           </p>
           <div className="burger-selector">
             <span className="selector-label">ESCOLHA SEU PRÓXIMO FAVORITO</span>
+            {systemReducedMotion && (
+              <div className="selector-motion-control">
+                <span role="status">{reducedMotion ? "Movimento reduzido no dispositivo" : "Animação completa ativada"}</span>
+                <button type="button" aria-pressed={fullMotionEnabled} onClick={toggleFullMotion}>
+                  {fullMotionEnabled ? "Reduzir movimento" : "Ativar animação"}
+                </button>
+              </div>
+            )}
             <div className="selector-row">
               <button
                 className="selector-arrow"

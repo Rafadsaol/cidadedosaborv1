@@ -3067,6 +3067,25 @@ img {
   letter-spacing: 1.9px;
   color: #b3b3b3;
 }
+.selector-motion-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 9px;
+  color: var(--muted);
+}
+.selector-motion-control button {
+  min-height: 40px;
+  padding: 8px 11px;
+  border: 1px solid #ad803f;
+  border-radius: 6px;
+  background: #ffb3470c;
+  color: var(--orange);
+  font-size: 10px;
+  white-space: nowrap;
+}
 .selector-row {
   display: flex;
   align-items: center;
@@ -3116,6 +3135,7 @@ img {
   transition: none;
 }
 .burger-thumbnail {
+  --card-motion: border-color 0.5s ease, background-color 0.5s ease, box-shadow 0.65s ease, transform 0.74s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -3123,11 +3143,7 @@ img {
   border: 1px solid #ffffff0a;
   border-radius: 9px;
   padding: 0 0 8px;
-  transition:
-    border-color 0.5s ease,
-    background-color 0.5s ease,
-    box-shadow 0.65s ease,
-    transform 0.74s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--card-motion);
   min-width: 0;
   overflow: visible;
 }
@@ -3173,6 +3189,7 @@ img {
   pointer-events: none;
 }
 .thumbnail-image {
+  --image-motion: height 0.74s cubic-bezier(0.4, 0, 0.2, 1), width 0.74s cubic-bezier(0.4, 0, 0.2, 1), margin 0.74s cubic-bezier(0.4, 0, 0.2, 1);
   display: block;
   position: relative;
   height: var(--thumbnail-height);
@@ -3180,10 +3197,7 @@ img {
   overflow: visible;
   border-radius: 8px 8px 0 0;
   z-index: 1;
-  transition:
-    height 0.74s cubic-bezier(0.4, 0, 0.2, 1),
-    width 0.74s cubic-bezier(0.4, 0, 0.2, 1),
-    margin 0.74s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: var(--image-motion);
 }
 .thumbnail-image .food-image {
   object-fit: contain;
@@ -3199,6 +3213,17 @@ img {
 }
 .burger-thumbnail.is-selected .food-image {
   filter: drop-shadow(0 10px 6px #0008);
+}
+@media (prefers-reduced-motion: reduce) {
+  .showcase[data-full-motion="true"] .burger-track[data-moving="true"] .burger-thumbnail {
+    transition: var(--card-motion) !important;
+  }
+  .showcase[data-full-motion="true"] .burger-track[data-moving="true"] .thumbnail-image {
+    transition: var(--image-motion) !important;
+  }
+  .showcase[data-full-motion="true"] .burger-track[data-moving="true"] .burger-thumbnail:before {
+    transition: opacity 0.3s ease, transform 0.65s ease !important;
+  }
 }
 .thumbnail-name {
   position: relative;
