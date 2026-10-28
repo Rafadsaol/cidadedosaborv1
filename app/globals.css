@@ -2339,6 +2339,55 @@ img {
     font-size: 12px;
     padding: 11px 15px;
   }
+  #favoritos .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  #favoritos .product-card,
+  #favoritos .product-body {
+    display: flex;
+    flex-direction: column;
+  }
+  #favoritos .product-photo {
+    padding: 10px;
+  }
+  #favoritos .product-tag {
+    top: 7px;
+    left: 7px;
+    font-size: 7px;
+    padding: 4px 6px;
+    letter-spacing: 0.3px;
+  }
+  #favoritos .product-body {
+    flex: 1;
+    padding: 12px 10px;
+  }
+  #favoritos .product-title {
+    min-height: 42px;
+  }
+  #favoritos .product-body h3 {
+    font-size: 14px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+  #favoritos .product-body > p {
+    margin-top: 8px;
+    margin-bottom: 16px;
+    line-height: 1.65;
+  }
+  #favoritos .product-bottom {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: auto;
+  }
+  #favoritos .card-price strong {
+    font-size: 19px;
+  }
+  #favoritos .add-button {
+    min-height: 44px;
+    padding: 10px 6px;
+  }
   .combo-banner {
     grid-template-columns: 1fr;
     min-height: 600px;
