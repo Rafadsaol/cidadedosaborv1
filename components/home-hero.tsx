@@ -63,6 +63,11 @@ export function HomeHero() {
   const previousPositions = useRef(new Map<string, number>());
   const animations = useRef<Animation[]>([]);
   const intro = useRef<HTMLDivElement>(null);
+  const heroNodes = useRef(new Map<string, HTMLDivElement>());
+  const previousHeroStyles = useRef(
+    new Map<string, { opacity: string; transform: string }>(),
+  );
+  const motionDirection = useRef(1);
   const { add, ready } = useCart();
   const slide = slides[index];
   const product = products.find((p) => p.id === slide.id)!;
@@ -71,11 +76,19 @@ export function HomeHero() {
   );
   const select = (next: number) => {
     if (next === index) return;
+    motionDirection.current =
+      (next - index + slides.length) % slides.length === 1 ? 1 : -1;
     previousPositions.current = new Map(
       [...thumbnailNodes.current].map(([id, node]) => [
         id,
         node.getBoundingClientRect().left,
       ]),
+    );
+    previousHeroStyles.current = new Map(
+      [...heroNodes.current].map(([id, node]) => {
+        const style = window.getComputedStyle(node);
+        return [id, { opacity: style.opacity, transform: style.transform }];
+      }),
     );
     setIndex(next);
   };
@@ -93,24 +106,56 @@ export function HomeHero() {
         if (Math.abs(distance) < 1) continue;
         animations.current.push(
           node.animate(
-            [{ translate: `${distance}px 0` }, { translate: "0px 0" }],
-            { duration: 380, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+            [
+              { translate: `${distance}px 0`, offset: 0 },
+              { translate: `${distance * 0.45}px -8px`, offset: 0.48 },
+              { translate: "0px 0", offset: 1 },
+            ],
+            { duration: 740, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
+          ),
+        );
+      }
+      for (const [id, node] of heroNodes.current) {
+        const before = previousHeroStyles.current.get(id);
+        if (!before) continue;
+        const selected = id === slides[index].id;
+        if (!selected && Number(before.opacity) < 0.01) continue;
+        const entry = `translateX(${motionDirection.current * 72}px) scale(0.94) rotate(${motionDirection.current * 3}deg)`;
+        const exit = `translateX(${motionDirection.current * -64}px) scale(0.94) rotate(${motionDirection.current * -3}deg)`;
+        animations.current.push(
+          node.animate(
+            [
+              {
+                opacity: before.opacity,
+                transform: Number(before.opacity) > 0.01 ? before.transform : entry,
+              },
+              { opacity: selected ? 1 : 0, transform: selected ? "none" : exit },
+            ],
+            { duration: 780, easing: "cubic-bezier(0.4, 0, 0.2, 1)" },
           ),
         );
       }
       if (intro.current) {
-        animations.current.push(
-          intro.current.animate(
-            [
-              { opacity: 0.45, transform: "translateY(6px)" },
-              { opacity: 1, transform: "translateY(0)" },
-            ],
-            { duration: 320, easing: "ease-out" },
-          ),
-        );
+        [...intro.current.children].forEach((element, position) => {
+          animations.current.push(
+            element.animate(
+              [
+                { opacity: 0, transform: "translateY(12px)" },
+                { opacity: 1, transform: "translateY(0)" },
+              ],
+              {
+                duration: 520,
+                delay: position * 75,
+                easing: "cubic-bezier(0.25, 0.1, 0.25, 1)",
+                fill: "backwards",
+              },
+            ),
+          );
+        });
       }
     }
     previousPositions.current.clear();
+    previousHeroStyles.current.clear();
   }, [index]);
   useEffect(
     () => () => animations.current.forEach((animation) => animation.cancel()),
@@ -223,6 +268,10 @@ export function HomeHero() {
             <div
               className={`showcase-food ${i === index ? "is-active" : ""}`}
               key={item.id}
+              ref={(node) => {
+                if (node) heroNodes.current.set(item.id, node);
+                else heroNodes.current.delete(item.id);
+              }}
               aria-hidden={i !== index}
             >
               <FoodImage

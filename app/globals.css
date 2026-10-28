@@ -3058,6 +3058,7 @@ img {
   margin-top: 12px;
 }
 .burger-selector {
+  --thumbnail-height: 65px;
   margin-top: 35px;
   max-width: 425px;
 }
@@ -3109,10 +3110,10 @@ img {
   border-radius: 9px;
   padding: 0 0 8px;
   transition:
-    border-color 0.2s,
-    background-color 0.2s,
-    box-shadow 0.3s ease,
-    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+    border-color 0.5s ease,
+    background-color 0.5s ease,
+    box-shadow 0.65s ease,
+    transform 0.74s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 0;
   overflow: visible;
 }
@@ -3138,11 +3139,12 @@ img {
   z-index: 3;
   opacity: 0;
   transform: translateY(-5px);
-  transition: opacity 0.25s ease, transform 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.65s ease;
 }
 .burger-thumbnail.is-selected:before {
   opacity: 1;
   transform: translateY(0);
+  transition-delay: 0.2s;
 }
 .burger-thumbnail.is-selected:after {
   content: "";
@@ -3159,22 +3161,25 @@ img {
 .thumbnail-image {
   display: block;
   position: relative;
-  height: 65px;
+  height: var(--thumbnail-height);
   width: 100%;
   overflow: visible;
   border-radius: 8px 8px 0 0;
   z-index: 1;
-  transition: height 0.38s ease, width 0.38s ease, margin 0.38s ease;
+  transition:
+    height 0.74s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.74s cubic-bezier(0.4, 0, 0.2, 1),
+    margin 0.74s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .thumbnail-image .food-image {
   object-fit: contain;
   padding: 4px;
   transition:
-    transform 0.25s ease,
-    filter 0.25s ease;
+    transform 0.65s ease,
+    filter 0.65s ease;
 }
 .burger-thumbnail.is-selected .thumbnail-image {
-  height: 104px;
+  height: calc(var(--thumbnail-height) + 39px);
   width: calc(100% + 30px);
   margin: -39px -15px 0;
 }
@@ -3232,9 +3237,7 @@ img {
   inset: 24px 42px 65px 10px;
   z-index: 1;
   opacity: 0;
-  transform: translateX(18px) scale(0.98);
   pointer-events: none;
-  transition: opacity 0.38s ease, transform 0.48s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .showcase-food.is-active {
   opacity: 1;
@@ -3379,10 +3382,8 @@ img {
     margin-inline: 42px;
   }
   .burger-selector {
+    --thumbnail-height: 57px;
     max-width: 370px;
-  }
-  .thumbnail-image {
-    height: 57px;
   }
   .selector-row {
     gap: 4px;
@@ -3618,6 +3619,7 @@ img {
     font-size: 7px;
   }
   .burger-selector {
+    --thumbnail-height: 61px;
     order: 2;
     max-width: 100%;
     margin: 14px 20px 3px;
@@ -3634,9 +3636,6 @@ img {
   }
   .burger-thumbnails {
     gap: 9px;
-  }
-  .thumbnail-image {
-    height: 61px;
   }
   .thumbnail-name {
     font-size: 7px;
