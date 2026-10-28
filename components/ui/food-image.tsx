@@ -7,12 +7,16 @@ export function FoodImage({
   priority = false,
   className = "",
   sizes = "(max-width: 640px) 100vw, (max-width: 1000px) 50vw, 40vw",
+  quality = 75,
+  loading,
 }: {
   src: string;
   alt: string;
   priority?: boolean;
   className?: string;
   sizes?: string;
+  quality?: 75 | 90;
+  loading?: "eager" | "lazy";
 }) {
   const [failed, setFailed] = useState(false);
   return (
@@ -22,6 +26,8 @@ export function FoodImage({
       fill
       priority={priority}
       sizes={sizes}
+      quality={quality}
+      loading={loading}
       className={`food-image ${className}`}
       onError={() => setFailed(true)}
     />

@@ -3099,7 +3099,6 @@ img {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 11px;
   flex: 1;
-  perspective: 700px;
 }
 .burger-thumbnail {
   position: relative;
@@ -3111,10 +3110,11 @@ img {
   padding: 0 0 8px;
   transition:
     border-color 0.2s,
-    background 0.2s;
+    background-color 0.2s,
+    box-shadow 0.3s ease,
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
   min-width: 0;
   overflow: visible;
-  transform-style: preserve-3d;
 }
 .burger-thumbnail.is-selected {
   border-color: #b48b4c;
@@ -3125,7 +3125,7 @@ img {
   transform: translateY(-3px);
   z-index: 2;
 }
-.burger-thumbnail.is-selected:before {
+.burger-thumbnail:before {
   content: "";
   position: absolute;
   left: calc(50% - 7px);
@@ -3136,6 +3136,13 @@ img {
   filter: drop-shadow(0 3px 5px #ffb34730);
   pointer-events: none;
   z-index: 3;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.25s ease, transform 0.3s ease;
+}
+.burger-thumbnail.is-selected:before {
+  opacity: 1;
+  transform: translateY(0);
 }
 .burger-thumbnail.is-selected:after {
   content: "";
@@ -3157,6 +3164,7 @@ img {
   overflow: visible;
   border-radius: 8px 8px 0 0;
   z-index: 1;
+  transition: height 0.38s ease, width 0.38s ease, margin 0.38s ease;
 }
 .thumbnail-image .food-image {
   object-fit: contain;
@@ -3165,9 +3173,13 @@ img {
     transform 0.25s ease,
     filter 0.25s ease;
 }
+.burger-thumbnail.is-selected .thumbnail-image {
+  height: 104px;
+  width: calc(100% + 30px);
+  margin: -39px -15px 0;
+}
 .burger-thumbnail.is-selected .food-image {
-  transform: translate3d(0, -24px, 24px) scale(1.5) rotate(-3deg);
-  filter: drop-shadow(2px 14px 8px #0009);
+  filter: drop-shadow(0 10px 6px #0008);
 }
 .thumbnail-name {
   position: relative;
@@ -3219,6 +3231,15 @@ img {
   position: absolute;
   inset: 24px 42px 65px 10px;
   z-index: 1;
+  opacity: 0;
+  transform: translateX(18px) scale(0.98);
+  pointer-events: none;
+  transition: opacity 0.38s ease, transform 0.48s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.showcase-food.is-active {
+  opacity: 1;
+  transform: none;
+  z-index: 2;
 }
 .showcase-food .food-image {
   object-fit: contain;
