@@ -56,6 +56,7 @@ export function Footer() {
           © {new Date().getFullYear()} Cidade do Sabor. Feito para dar fome.
         </span>
         <span>Protótipo de demonstração · Sem pedidos ou reservas reais.</span>
+        <Link href="/case-study" className="text-link small">Case study do projeto <ArrowUpRight size={13} /></Link>
       </div>
     </footer>
   );

@@ -8,6 +8,8 @@ export function SiteFrame({
 }: {
   children: React.ReactNode;
 }) {
-  const admin = usePathname().startsWith("/admin");
-  return <><a href="#main" className="skip-link">Pular para o conteúdo</a>{!admin && <Header />}<main id="main">{children}</main>{!admin && <Footer />}</>;
+  const pathname = usePathname();
+  const admin = pathname.startsWith("/admin");
+  const caseStudy = pathname === "/case-study";
+  return <><a href="#main" className="skip-link">Pular para o conteúdo</a>{!admin && !caseStudy && <Header />}<main id="main">{children}</main>{!admin && <Footer />}</>;
 }

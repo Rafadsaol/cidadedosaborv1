@@ -84,6 +84,10 @@ tests/logic.spec.ts         # Preços, armazenamento e validação
 playwright.config.ts
 ```
 
+## Apresentação de portfólio
+
+Acesse `/case-study` ou o link **Case study do projeto** no rodapé. A página reúne identidade visual, capturas reais, recursos implementados, tecnologias e acessos à loja e ao painel demonstrativo. A análise do projeto e as instruções para atualizar as capturas estão em [Case study](docs/CASE-STUDY.md).
+
 ## V3: operação demonstrativa
 
 Além do cardápio, personalização e carrinho da V2, a V3 inclui checkout com registro local de pedidos, histórico do cliente, reservas persistidas e painel administrativo com dashboard, gestão de pedidos/produtos/reservas, clientes fictícios, relatórios e restauração com confirmação.
