@@ -41,7 +41,7 @@ const links = [
 export function Header() {
   const { profile } = useDemo();
   const [open, setOpen] = useState(false);
-  const path = usePathname();
+  const path = usePathname().replace(/\/+$/, "") || "/";
   const { count, ready } = useCart();
   const drawer = useRef<HTMLDialogElement>(null);
   useEffect(() => {

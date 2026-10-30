@@ -45,7 +45,7 @@ export function AdminShell({
     ready,
     login
   } = useDemo();
-  const path = usePathname();
+  const path = usePathname().replace(/\/+$/, "") || "/";
   const [open, setOpen] = useState(false);
   if (!ready) return <div className="container empty-state" role="status">Preparando a operação demonstrativa…</div>;
   if (profile !== "admin") return <section className="container admin-access"><ShieldCheck size={48} /><span className="eyebrow">ÁREA DE DEMONSTRAÇÃO</span><h1>Explore o outro lado do balcão.</h1><p>Escolha o perfil Administrador Demo para conhecer o painel. Esta escolha simula permissões e não oferece autenticação ou segurança real.</p><Link href="/login" className="button">Escolher perfil demo <ArrowUpRight size={18} /></Link><Link href="/" className="text-link">Voltar à loja</Link></section>;
